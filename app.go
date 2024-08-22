@@ -7,6 +7,8 @@ import (
 	"slices"
 	"sync/atomic"
 	"time"
+
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 type Message struct {
@@ -96,8 +98,14 @@ func (a *App) RegisterOrLogin(user, pwd string) (msg Message) {
 
 // todo: 暂时不考虑
 // Recharge 充值，返回一个字符二维码、和一个全局事件。参考 https://wails.io/zh-Hans/docs/reference/runtime/events
-func (a *App) Recharge(months int) (qrImagePath string, eventName string, msg Message) {
-	return
+// 回调返回结果是Message类型
+func (a *App) Recharge(months int, eventName string) (qrImagePath string) {
+	go func() {
+		// 等待支付结果
+		runtime.EventsEmit(context.Background(), eventName, Message{Code: OK, Msg: "支付成功"})
+	}()
+
+	return "./xx/xx/qr.png"
 }
 
 type GameId = int32 // 最小值为1

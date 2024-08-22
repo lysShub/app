@@ -24,4 +24,5 @@
 
 
 
-
+wails generate module
+wails build
