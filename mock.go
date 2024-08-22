@@ -159,7 +159,7 @@ func (a *Mock) ListGames() (list []GameInfo, selectedIdx int, msg Message) {
 	return list, selectedIdx, OK.Message()
 }
 
-func (a *Mock) GetGame(gameId GameId) (GameInfo, Message) {
+func (a *Mock) SelectGame(gameId GameId) (GameInfo, Message) {
 	if !a.logined() {
 		return GameInfo{}, NotLogin.Message()
 	} else if !a.gameIdValid(gameId) {

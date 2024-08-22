@@ -126,8 +126,8 @@ func (a *App) ListGames() (list []GameInfo, selectedIdx int, msg Message) {
 	return a.Mock.ListGames()
 }
 
-func (a *App) GetGame(gameId GameId) (GameInfo, Message) {
-	return a.Mock.GetGame(gameId)
+func (a *App) SelectGame(gameId GameId) (GameInfo, Message) {
+	return a.Mock.SelectGame(gameId)
 }
 
 // SearchGame 根据关键字搜索游戏

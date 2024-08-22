@@ -8,8 +8,6 @@ export function AddGame(arg1:number):Promise<main.Message>;
 
 export function DisableAccelerate():Promise<main.Message>;
 
-export function GetGame(arg1:number):Promise<main.GameInfo|main.Message>;
-
 export function GetUser():Promise<main.UserInfo|main.Message>;
 
 export function ListGames():Promise<Array<main.GameInfo>>;
@@ -19,6 +17,8 @@ export function Recharge(arg1:number,arg2:string):Promise<string|main.Message>;
 export function RegisterOrLogin(arg1:string,arg2:string):Promise<main.Message>;
 
 export function SearchGame(arg1:string):Promise<Array<main.GameInfo>|main.Message>;
+
+export function SelectGame(arg1:number):Promise<main.GameInfo|main.Message>;
 
 export function SetGame(arg1:number):Promise<main.Message>;
 
