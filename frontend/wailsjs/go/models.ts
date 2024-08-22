@@ -8,6 +8,11 @@ export namespace main {
 	    VIPExpired = 4,
 	    NotSetGame = 5,
 	    Accelerating = 6,
+	    InvalidMonths = 7,
+	    GameExist = 8,
+	    NotAccelerated = 9,
+	    RequireGameId = 10,
+	    Unknown = 11,
 	}
 	export class GameInfo {
 	    game_id: number;
