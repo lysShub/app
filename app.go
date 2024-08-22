@@ -11,6 +11,11 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
+type ApiResponse struct {
+	Code MsgCode   `json:"code"`
+	Msg  string    `json:"msg"`
+	data *UserInfo `json:"data"`
+}
 type Message struct {
 	Code MsgCode `json:"code"`
 	Msg  string  `json:"msg"`
@@ -62,23 +67,33 @@ func (a *App) beforeClose(ctx context.Context) (prevent bool) { return false }
 func (a *App) shutdown(ctx context.Context)                   {}
 
 type UserInfo struct {
-	Name     string
-	Password string
-	Phone    string
-	Expire   int64 // utc 时间戳
+	Name     string `json:"name"`
+	Password string `json:"password"`
+	Phone    string `json:"phone"`
+	Expire   int64  `json:"expire"` // utc 时间戳
 }
 
 // GetUser 获取用户信息, 应用渲染完成即调用此函数, 如果msg.Code==NotLogin, 则弹出注册登录页面
-func (a *App) GetUser() (info UserInfo, msg Message) {
+func (a *App) GetUser() ApiResponse {
 	if !a.login.Load() {
-		return UserInfo{}, NotLogin.Message()
+		return ApiResponse{
+			Code: NotLogin,
+			Msg:  NotLogin.String(),
+			data: &UserInfo{
+				Name: "123",
+			},
+		}
 	} else {
-		return UserInfo{
-			Name:     a.username,
-			Password: a.password,
-			Phone:    a.phone,
-			Expire:   a.expire.Unix(),
-		}, OK.Message()
+		return ApiResponse{
+			Code: OK,
+			Msg:  OK.String(),
+			data: &UserInfo{
+				Name:     a.username,
+				Password: a.password,
+				Phone:    a.phone,
+				Expire:   a.expire.Unix(),
+			},
+		}
 	}
 }
 

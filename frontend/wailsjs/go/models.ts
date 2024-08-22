@@ -9,6 +9,59 @@ export namespace main {
 	    NotSetGame = 5,
 	    Accelerating = 6,
 	}
+	export class UserInfo {
+	    name: string;
+	    password: string;
+	    phone: string;
+	    expire: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new UserInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.password = source["password"];
+	        this.phone = source["phone"];
+	        this.expire = source["expire"];
+	    }
+	}
+	export class ApiResponse {
+	    code: MsgCode;
+	    msg: string;
+	    // Go type: UserInfo
+	    data?: any;
+	
+	    static createFrom(source: any = {}) {
+	        return new ApiResponse(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.code = source["code"];
+	        this.msg = source["msg"];
+	        this.data = this.convertValues(source["data"], null);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class GameInfo {
 	    game_id: number;
 	    name: string;
@@ -73,18 +126,6 @@ export namespace main {
 	        this.loss_downlink2 = source["loss_downlink2"];
 	        this.ping1 = source["ping1"];
 	        this.ping2 = source["ping2"];
-	    }
-	}
-	export class UserInfo {
-	
-	
-	    static createFrom(source: any = {}) {
-	        return new UserInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	
 	    }
 	}
 

@@ -1,19 +1,187 @@
 <!DOCTYPE html>
-<html>
+<html class="" lang= >
 
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge, Chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgo=">
     <!-- Main Source Files -->
-    <link rel="stylesheet" href="main.css" />
+    <link rel="stylesheet" href="main.css"/>
     <script src="main.js"></script>
+    <script src="assets/js/3.4.5"></script>
+    <script>
+        function getGameList(){
+            ListGames().then(res=>{
+                let gameList = document.getElementById('gameList')
+                res.data.forEach(game=>{
+                    let div = document.createElement('div')
+                    div.classList.add('flex','items-center','gap-3','hover:ring','px-5','w-full')
+                    div.innerHTML = `<img src="${game.icon}" class="object-cover size-10 "/>
+                    <span>${game.name}</span>`
+                    gameList.appendChild(div)
+                })
+            })
+        }
+        window.onload = function () {
+           getUser().then(res=>{
+                if (res.code == 2) {
+                    // alert('请登录')
+                    // window.location.href = 'login.html'
+                    toggleLoginSection()
+                } else {
+                    console.log('user',res)
+                    document.getElementById('userName').innerText = res.data.username
+                    document.getElementById('expireDate').innerText = res.data.expireDate
+                }
+           })
+        }
+        function toggleLoginSection(){
+            document.getElementById('loginSection').classList.toggle('hidden')
+        }
+        function Login(){
+            let account = document.getElementById('account').value;
+            let password = document.getElementById('password').value;
+            registerOrLogin(account,password).then(res=>{
+                console.log('login',res)
+                if (res.code == 0) {
+                    alert('登录成功')
+                    toggleLoginSection()
+                } else {
+                    alert('登录失败')
+                }
+            })
+        }
+    </script>
 </head>
+<body class=" ">
+<div class="flex pt-10 h-screen">
+    <div class="h-full w-[300px] border-  border-white flex flex-col	">
+        <!--            game select-->
+        <div id="gameList" class=" flex flex-col items-center mt-5 gap-3 overflow-y-auto	 flex-grow">
+            <div class="flex items-center justify-center gap-3 hover:ring px-5 w-full">
+                <img src="assets/images/csgo.png" class="object-cover size-10 "/>
+                <span>csgo 国际服</span>
+            </div>
+            <div class="flex items-center justify-center gap-3 hover:ring px-5 w-full">
+                <img src="assets/images/csgo.png" class="object-cover size-10 "/>
+                <span>csgo 国际服</span>
+            </div>
+            <div class="flex items-center gap-3 border-bottom">
+                <img src="assets/images/dnf.jpg" class="object-cover size-10 "/>
+                <span>csgo 国际服</span>
+            </div>
+            <div class="flex items-center gap-3 border-bottom">
+                <img src="assets/images/dnf.jpg" class="object-cover size-10 "/>
+                <span>csgo 国际服</span>
+            </div>
+            <div class="flex items-center gap-3 border-bottom">
+                <img src="assets/images/dnf.jpg" class="object-cover size-10 "/>
+                <span>csgo 国际服</span>
+            </div>
+            <div class="flex items-center gap-3 border-bottom">
+                <img src="assets/images/dnf.jpg" class="object-cover size-10 "/>
+                <span>csgo 国际服</span>
+            </div>
+            <div class="flex items-center gap-3 border-bottom">
+                <img src="assets/images/dnf.jpg" class="object-cover size-10 "/>
+                <span>csgo 国际服</span>
+            </div>
+            <div class="flex items-center gap-3 border-bottom">
+                <img src="assets/images/dnf.jpg" class="object-cover size-10 "/>
+                <span>csgo 国际服</span>
+            </div>
+            <div class="flex items-center gap-3 border-bottom">
+                <img src="assets/images/dnf.jpg" class="object-cover size-10 "/>
+                <span>csgo 国际服</span>
+            </div>
+            <div class="flex items-center gap-3 border-bottom">
+                <img src="assets/images/dnf.jpg" class="object-cover size-10 "/>
+                <span>csgo 国际服</span>
+            </div>
+            <div class="flex items-center gap-3 border-bottom">
+                <img src="assets/images/dnf.jpg" class="object-cover size-10 "/>
+                <span>csgo 国际服</span>
+            </div>
+            <div class="flex items-center gap-3 border-bottom">
+                <img src="assets/images/dnf.jpg" class="object-cover size-10 "/>
+                <span>csgo 国际服</span>
+            </div>
+            <div class="flex items-center gap-3 border-bottom">
+                <img src="assets/images/dnf.jpg" class="object-cover size-10 "/>
+                <span>csgo 国际服</span>
+            </div>
+            <div class="flex items-center gap-3 border-bottom">
+                <img src="assets/images/dnf.jpg" class="object-cover size-10 "/>
+                <span>csgo 国际服</span>
+            </div>
+            <div class="flex items-center gap-3 border-bottom">
+                <img src="assets/images/dnf.jpg" class="object-cover size-10 "/>
+                <span>csgo 国际服</span>
+            </div>
+            <div class="flex items-center gap-3 border-bottom">
+                <img src="assets/images/dnf.jpg" class="object-cover size-10 "/>
+                <span>csgo 国际服</span>
+            </div>
+        </div>
+        <!--        user section-->
+        <div class="flex item-center gap-3 p-5 border">
+            <img src="assets/images/logo-universal.png" class="object-cover size-10 rounded-full  ring"/>
+            <div class="flex flex-col items-start">
+                <p class="line-clamp-1 break-all">昵称：<span id="userName">12312313131312123123</span></p>
+                <p class="line-clamp-1 break-all">到期：<span id="expireDate">2024年1月1日</span></p>
+            </div>
+        </div>
+    </div>
+    <div class="space-y-52 ml-10">
+        <!--        view-->
+        <div>
+            <div class="border w-[400px] py-10">CS GO 国服</div>
+            <div class="flex gap-3 mt-5">
+                <div class="border p-3">最近加速：<span>2020-01-02 01：1：:01</span></div>
+                <div class="border p-3">累计时长：<span>001小时 01 分</span></div>
+            </div>
+        </div>
+<!--        static-->
+        <div>
+            <button class="border rounded-xl bg-green-400 p-3 hover:bg-green-400/90">停止加速</button>
+            <div class="flex gap-3 mt-5">
+                <div class="border p-3">累计时长：<span>001小时 01 分</span></div>
+                <div class="border p-3">加速流量：<span>152.1 KB</span></div>
+            <div>
+            </div>
+        </div>
+        <!--        operation-->
+        <div class="flex flex-col items-start gap-3">
+            <div class=" flex  gap-3">
+                <select class=" p-3 rounded-xl bg-transparent" required>
+                    <option class="hidden"  checked>选择区服</option>
+                    <option>加速节点2</option>
+                    <option>加速节点3</option>
+                    <option>加速节点4</option>
+                    <option>加速节点5</option>
+                </select>
+            </div>
+            <div>
+                <input type="radio" name="gender" checked value="apple" id='1'><label for="1">固定路由</label></br>
+                <input type="radio" name="gender" checked value="apple" id='2'><label for="2">智能路由</label>
+            </div>
+            <button class="border rounded-xl bg-green-400 p-3 hover:bg-green-400/90">加速游戏</button>
 
-<body>
+        </div>
+    </div>
+</div>
+    <div id="loginSection"  class="hidden bg-white/50 size-full z-99 fixed top-0  flex items-center justify-center" >
+        <div class="bg-white px-10 py-5 rounded-2xl ">
+            <div class="flex flex-col items-center gap-3">
+                <input type="text" placeholder="账号" class="border p-3 rounded-xl" id="account"/>
+                <input type="password" placeholder="密码" class="border p-3 rounded-xl" id="password"/>
+                <button class="border rounded-xl bg-green-400 p-3 hover:bg-green-400/90" onclick="Login()">登录</button>
+            </div>
+        </div>
+    </div>
+
+</div>
 </body>
-
-
 
 </html>

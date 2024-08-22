@@ -8,7 +8,7 @@ export function AddGame(arg1:number):Promise<main.Message>;
 
 export function DisableAccelerate():Promise<main.Message>;
 
-export function GetUser():Promise<main.UserInfo|main.Message>;
+export function GetUser():Promise<main.ApiResponse>;
 
 export function ListGames():Promise<Array<main.GameInfo>>;
 

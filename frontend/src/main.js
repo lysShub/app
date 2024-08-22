@@ -1,3 +1,9 @@
 function getUser() {
-    window.go.main.App.GetUser("test", "123")
+    return window.go.main.App.GetUser()
+}
+function registerOrLogin(username, password) {
+    return window.go.main.App.RegisterOrLogin(username, password)
+}
+function ListGames() {
+    return window.go.main.App.ListGames()
 }
