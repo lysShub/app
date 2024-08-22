@@ -14,6 +14,10 @@ export function DisableAccelerate() {
   return window['go']['main']['App']['DisableAccelerate']();
 }
 
+export function GetSelectedGame() {
+  return window['go']['main']['App']['GetSelectedGame']();
+}
+
 export function GetUser() {
   return window['go']['main']['App']['GetUser']();
 }

@@ -29,7 +29,7 @@ const (
 	NotLogin                      // 没有登录
 	IsLogined                     // 已经登录
 	VIPExpired                    // vip 已过期
-	NotSetGame                    // 请先选择加速的游戏
+	NotSelectGame                 // 请选择加速的游戏
 	Accelerating                  // 游戏已在加速
 	InvalidMonths                 // 无效月数
 	GameExist                     // 游戏已存在
@@ -45,7 +45,7 @@ var codeLits = []string{
 	"NotLogin",
 	"IsLogined",
 	"VIPExpired",
-	"NotSetGame",
+	"NotSelectGame",
 	"Accelerating",
 	"InvalidMonths",
 	"GameExist",
@@ -59,7 +59,7 @@ var codes = []MsgCode{
 	NotLogin,
 	IsLogined,
 	VIPExpired,
-	NotSetGame,
+	NotSelectGame,
 	Accelerating,
 	InvalidMonths,
 	GameExist,
@@ -126,8 +126,14 @@ func (a *App) ListGames() (list []GameInfo, selectedIdx int, msg Message) {
 	return a.Mock.ListGames()
 }
 
+// SelectGame 选中某个游戏
 func (a *App) SelectGame(gameId GameId) (GameInfo, Message) {
 	return a.Mock.SelectGame(gameId)
+}
+
+// GetSelectedGame 获取当前选中的游戏
+func (a *App) GetSelectedGame() (GameInfo, Message) {
+	return a.Mock.GetSelectedGame()
 }
 
 // SearchGame 根据关键字搜索游戏

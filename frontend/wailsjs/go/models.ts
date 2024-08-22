@@ -6,7 +6,7 @@ export namespace main {
 	    NotLogin = 2,
 	    IsLogined = 3,
 	    VIPExpired = 4,
-	    NotSetGame = 5,
+	    NotSelectGame = 5,
 	    Accelerating = 6,
 	    InvalidMonths = 7,
 	    GameExist = 8,

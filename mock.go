@@ -169,6 +169,19 @@ func (a *Mock) SelectGame(gameId GameId) (GameInfo, Message) {
 	return a.Games[gameId], OK.Message()
 }
 
+func (a *Mock) GetSelectedGame() (GameInfo, Message) {
+	if !a.logined() {
+		return GameInfo{}, NotLogin.Message()
+	}
+
+	if a.SelectedGame == 0 {
+		return GameInfo{}, NotSelectGame.Message()
+	} else {
+		return a.Games[a.SelectedGame], OK.Message()
+	}
+
+}
+
 func (a *Mock) SearchGame(keyword string) (list []GameInfo, msg Message) {
 	if !a.logined() {
 		return nil, NotLogin.Message()
