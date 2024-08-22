@@ -12,9 +12,9 @@ import (
 )
 
 type ApiResponse struct {
-	Code MsgCode   `json:"code"`
-	Msg  string    `json:"msg"`
-	data *UserInfo `json:"data"`
+	Code MsgCode  `json:"code"`
+	Msg  string   `json:"msg"`
+	Data UserInfo `json:"data"`
 }
 type Message struct {
 	Code MsgCode `json:"code"`
@@ -79,7 +79,7 @@ func (a *App) GetUser() ApiResponse {
 		return ApiResponse{
 			Code: NotLogin,
 			Msg:  NotLogin.String(),
-			data: &UserInfo{
+			Data: UserInfo{
 				Name: "123",
 			},
 		}
@@ -87,7 +87,7 @@ func (a *App) GetUser() ApiResponse {
 		return ApiResponse{
 			Code: OK,
 			Msg:  OK.String(),
-			data: &UserInfo{
+			Data: UserInfo{
 				Name:     a.username,
 				Password: a.password,
 				Phone:    a.phone,

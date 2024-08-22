@@ -30,8 +30,7 @@ export namespace main {
 	export class ApiResponse {
 	    code: MsgCode;
 	    msg: string;
-	    // Go type: UserInfo
-	    data?: any;
+	    data: UserInfo;
 	
 	    static createFrom(source: any = {}) {
 	        return new ApiResponse(source);
@@ -41,7 +40,7 @@ export namespace main {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.code = source["code"];
 	        this.msg = source["msg"];
-	        this.data = this.convertValues(source["data"], null);
+	        this.data = this.convertValues(source["data"], UserInfo);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
