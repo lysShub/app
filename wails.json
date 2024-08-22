@@ -1,0 +1,10 @@
+{
+  "name": "app",
+  "outputfilename": "app",
+  "frontend:install": "",
+  "frontend:build": "",
+  "author": {
+    "name": "lysShub",
+    "email": "lysShub@gmail.com"
+  }
+}
