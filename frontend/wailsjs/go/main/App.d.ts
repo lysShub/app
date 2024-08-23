@@ -14,7 +14,7 @@ export function GetUser():Promise<main.ApiResponse>;
 
 export function ListGames():Promise<main.ApiResponse>;
 
-export function Recharge(arg1:number,arg2:string):Promise<string|main.Message>;
+export function Recharge(arg1:number,arg2:string):Promise<main.ApiResponse>;
 
 export function RegisterOrLogin(arg1:string,arg2:string):Promise<main.Message>;
 

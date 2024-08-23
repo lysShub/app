@@ -86,6 +86,8 @@ type GameInfo struct {
 	CacheFixRoute   bool   `json:"cache_fix_route"`
 	LastActive      int64  `json:"last_active"` // utc 时间戳
 	Duration        int64  `json:"duration"`
+	//流量
+	Flow int64 `json:"flow"`
 }
 
 type App struct {
@@ -128,10 +130,15 @@ func (a *App) RegisterOrLogin(user, pwd string) (msg Message) {
 // todo: 暂时不考虑
 // Recharge 充值，返回一个字符二维码、和一个全局事件。参考 https://wails.io/zh-Hans/docs/reference/runtime/events
 // 回调返回结果是Message类型
-func (a *App) Recharge(months int, eventName string) (qrImagePath string, msg Message) {
-	return a.Mock.Recharge(months, func(m Message) {
+func (a *App) Recharge(months int, eventName string) ApiResponse {
+	path, message := a.Mock.Recharge(months, func(m Message) {
 		runtime.EventsEmit(a.ctx, eventName, m)
 	})
+	return ApiResponse{
+		Code: message.Code,
+		Msg:  message.Msg,
+		Data: path,
+	}
 }
 
 // ListGames 获取已添加的游戏列表, selectedIdx 表示默认应该选中的游戏
@@ -226,5 +233,6 @@ type Stats struct {
 
 // Stats 获取统计信息, 阻塞函数, 如果距上次调用时间短于3s, 会主动阻塞直到恰好相距3s
 func (a *App) Stats() (s Stats) {
-	return a.Mock.Stats()
+	stats := a.Mock.Stats()
+	return stats
 }

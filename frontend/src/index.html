@@ -10,7 +10,19 @@
     <link rel="stylesheet" href="main.css"/>
     <script src="main.js"></script>
     <script src="assets/js/3.4.5"></script>
+    <script src="/wails/runtime.js"></script>
+    <script src="assets/js/echarts.min.js"></script>
     <script>
+
+
+        let gameId = -1;
+        const intervalList = []
+
+        function clearAllInterval() {
+            intervalList.forEach(interval => {
+                clearInterval(interval)
+            })
+        }
 
         function addGame(gameId) {
             AddGame(gameId).then(res => {
@@ -26,6 +38,11 @@
 
         function toggleTabSwitch(name) {
             let tabs = ['ing', 'begin', 'recharge']
+            if (name == 'ing'){
+                getStats()
+            } else {
+                clearAllInterval()
+            }
             tabs.forEach(tab => {
                 if (tab == name) {
                     document.getElementById(tab).classList.remove('hidden')
@@ -61,7 +78,7 @@
             document.getElementById('searchSection').classList.toggle('hidden')
         }
 
-        function transHumanTime (time) {
+        function transHumanTime(time) {
             let i = 0;
             let unit = ["秒", "分钟", "小时", "天", "月", "年"];
             while (time > 60) {
@@ -69,6 +86,20 @@
                 i++;
             }
             return `${time.toFixed(2)}${unit[i]}`;
+        }
+
+        function transHumanBitSize(size) {
+            let i = 0;
+            let unit = ["b", "B", "KB", "MB", "GB", "TB"];
+            if (size > 8) {
+                size /= 8;
+                i++;
+            }
+            while (size > 1024) {
+                size /= 1024;
+                i++;
+            }
+            return `${size.toFixed(2)}${unit[i]}`;
         }
 
         function formatDateTime(time, format) {
@@ -104,13 +135,14 @@
                 <img src="${game.icon_path}" class="object-cover size-10 "/>
                 <span>${game.name}</span>
         `
-                 gameList.appendChild(div)
+                    gameList.appendChild(div)
                 })
             })
         }
 
         async function tryGetUser() {
             return await getUser().then(res => {
+                console.log('user', res)
                 if (res.code == 2) {
                     toggleLoginSection()
                     return false;
@@ -154,14 +186,21 @@
             })
             e.classList.add('bg-green-400')
             toggleTabSwitch('begin')
-            let gameId = e.getAttribute('gameId')
+            gameId = parseInt(e.getAttribute('gameId'))
 
-            SelectGame(parseInt(gameId)).then(res => {
+            SelectGame(gameId).then(res => {
                 console.log('select game', res)
-                if (res.code ==0) {
-                    document.getElementById('gameBg').src = res.data.bgimg_path
+                if (res.code == 0) {
+                    let bgE = document.getElementsByClassName('gameBg');
+                    for (let i = 0; i < bgE.length; i++) {
+                        bgE[i].src = res.data.bgimg_path
+                    }
                     document.getElementById('lastActive').innerText = formatDateTime(new Date(res.data.last_active * 1000), 'yyyy年MM月dd日 HH:mm:ss')
-                    document.getElementById('duration').innerText = transHumanTime(res.data.duration)
+                    let durationE = document.getElementsByClassName('duration');
+                    for (let i = 0; i < durationE.length; i++) {
+                        durationE[i].innerText = transHumanTime(res.data.duration)
+                    }
+                    document.getElementById('flow').innerText = transHumanBitSize(res.data.flow)
                     let serverList = document.getElementById('serverList')
                     serverList.innerHTML = ''
                     res.data.game_servers.forEach(server => {
@@ -176,12 +215,246 @@
         }
 
         function begin(e) {
-            //充值
-            toggleTabSwitch('ing')
+            Accelerate(gameId).then(res => {
+                console.log('being', res)
+                // toggleTabSwitch('recharge')
+                if (res.code == 4) {
+                    alert('余额不足')
+                    toggleTabSwitch('recharge')
+                } else if (res.code == 6) {
+                    // alert(res.msg)
+                    toggleTabSwitch('ing')
+                } else if (res.code == 0) {
+                    toggleTabSwitch('ing')
+                }
+            })
+
+        }
+
+        function getStats() {
+            var container1 = echarts.init(document.getElementById('container1'), null, {
+                renderer: 'canvas',
+                useDirtyRect: false
+            });
+            let data1 = []
+            let data2 = []
+            const option = {
+                legend: {
+                    data: ['阶段一', '整体'],
+                    textStyle: {
+                        color: '#fff'
+                    }
+                },
+                title: {
+                    text: '延时(ms)',
+                    textAlign: 'auto',
+                    textStyle: {
+                        color: '#fff'
+                    }
+                },
+                xAxis: {
+                    type: 'time',
+                    show: false
+                },
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: '阶段一',
+                        min: 0,
+                        max: 300,
+                        position: 'left',
+                        axisLabel: {
+                            formatter: '{value}'
+                        }
+                    },
+                    {
+                        type: 'value',
+                        name: '整体',
+                        min: 0,
+                        max: 300,
+                        position: 'right',
+                        axisLabel: {
+                            formatter: '{value} '
+                        }
+                    }
+                ],
+                series: [
+                    {
+                        name: '阶段一',
+                        type: 'line',
+                        smooth: true,
+                        yAxisIndex: 0,
+                        data: data1
+                    },
+                    {
+                        name: '整体',
+                        type: 'line',
+                        smooth: true,
+                        yAxisIndex: 1,
+                        data: data2
+                    }
+                ]
+            };
+            if (option && typeof option === 'object') {
+                container1.setOption(option);
+            }
+
+
+
+            const container2 = echarts.init(document.getElementById('container2'), null, {
+                renderer: 'canvas',
+                useDirtyRect: false
+            });
+            let data3 = []
+            let data4 = []
+            let data5 = []
+            let data6 = []
+            const option2 = {
+                legend:{
+                    data:['第一阶段上行丢包','第一阶段下行丢包','第二阶段上行丢包','第二阶段下行丢包'],
+                    textStyle: {
+                        color: '#fff'
+                    }
+                },
+                title: {
+                    text: '丢包(%s)',
+                    textAlign: 'auto',
+                    textStyle: {
+                        color: '#fff'
+                    }
+                },
+                xAxis: {
+                    type: 'time',
+                    show: false
+                },
+                yAxis: {
+                    type: 'value',
+                    min: 0,
+                    max: 100,
+                    position: 'left',
+                    axisLabel: {
+                        formatter: '{value}'
+                    }
+                },
+                series: [
+                    {
+                        name: '第一阶段上行丢包',
+                        type: 'line',
+                        smooth: true,
+                        yAxisIndex: 0,
+                        data: data3
+                    },
+                    {
+                        name: '第一阶段下行丢包',
+                        type: 'line',
+                        smooth: true,
+                        yAxisIndex: 0,
+                        data: data4
+                    },
+                    {
+                        name: '第二阶段上行丢包',
+                        type: 'line',
+                        smooth: true,
+                        yAxisIndex: 0,
+                        data: data5
+                    },
+                    {
+                        name: '第二阶段下行丢包',
+                        type: 'line',
+                        smooth: true,
+                        yAxisIndex: 0,
+                        data: data6
+                    },
+                ]
+            };
+            if (option2 && typeof option2 === 'object') {
+                container2.setOption(option2);
+            }
+
+
+
+            intervalList.push(setInterval(() => {
+                GetStats().then(res => {
+                    let now = new Date().getTime();
+                    data1.push([now, res.ping1])
+                    data2.push([now, res.ping2])
+                    data3.push([now, res.loss_uplink1])
+                    data4.push([now, res.loss_downlink1])
+                    data5.push([now, res.loss_uplink2])
+                    data6.push([now, res.loss_downlink2])
+                    if (data1.length>100){
+                        data1.shift()
+                        data2.shift()
+                        data3.shift()
+                        data4.shift()
+                        data5.shift()
+                        data6.shift()
+                    }
+                    container2.setOption({
+                        series: [
+                            {
+                                name: '第一阶段上行丢包',
+                                data:data3
+                            },
+                            {
+                                name: '第一阶段下行丢包',
+                                data:data4
+                            },
+                            {
+                                name: '第二阶段上行丢包',
+                                data:data5
+                            },
+                            {
+                                name: '第二阶段下行丢包',
+                                data:data6
+                            }
+                        ]
+                    })
+
+                    container1.setOption({
+                        series: [
+                            {
+                                name: '阶段一',
+                                data:data1
+                            },
+                            {
+                                name: '整体',
+                                data:data2
+                            }
+                        ]
+                    });
+                })
+            }, 500))
+
+        }
+
+        function recharge() {
+            let month = parseInt(document.getElementById('month').value)
+            if (!month) {
+                alert('请输入充值月份')
+                return
+            }
+            Recharge(month, 'recharge-success').then(res => {
+                console.log('recharge', res)
+                if (res.code == 0) {
+                    document.getElementById('qrCode').src = res.data
+                    window.runtime.EventsOn('recharge-success', () => {
+                        alert('充值成功')
+                        toggleTabSwitch('begin')
+                    })
+                } else {
+                    alert(res.msg)
+                }
+            })
         }
 
         function stop(e) {
-            toggleTabSwitch('begin')
+            DisableAccelerate().then(res => {
+                console.log('stop', res)
+                if (res.code == 0) {
+                    toggleTabSwitch('begin')
+                }
+            })
         }
 
     </script>
@@ -205,33 +478,35 @@
             </div>
         </div>
     </div>
+
     <div class=" ml-10" id="detailTabSection">
         <!--        view-->
         <div id="ing" class="hidden">
             <div class="flex gap-3">
-                <div class="border w-[400px] py-10">CS GO 国服</div>
+                <img class=" w-[400px] h-[300px] object-cover rounded-2xl gameBg"/>
                 <button class="border rounded-xl bg-green-400 p-3 hover:bg-green-400/90" onclick="stop(this)">停止加速
                 </button>
             </div>
             <div class="flex gap-3 mt-5">
-                <div class=" p-3">累计时长：<span>001小时 01 分</span></div>
-                <div class=" p-3">加速流量：<span>152.1 KB</span></div>
+                <div class=" p-3">累计时长：<span class="duration"></span></div>
+                <div class=" p-3">加速流量：<span id="flow"></span></div>
                 <div>
                 </div>
+            </div>
+            <div>
+                <!--                echart-->
+                <div id="container1" class="h-[300px] w-[500px]"></div>
+                <div id="container2" class="h-[300px] w-[500px]"></div>
             </div>
             <div>
             </div>
         </div>
 
         <div id="begin" class="hidden">
-            <img class=" w-[400px] h-[300px] object-cover rounded-2xl" id="gameBg"/>
+            <img class=" w-[400px] h-[300px] object-cover rounded-2xl gameBg"/>
             <div class="flex gap-3 mt-5">
-                <div class="border p-3">最近加速：<span id="lastActive" class="">2020-01-02 01：1：:01</span></div>
-                <div class="border p-3">累计时长：<span id="duration">001小时 01 分</span></div>
-            </div>
-
-            <div>
-
+                <div class=" p-3">最近加速：<span id="lastActive" class=""></span></div>
+                <div class=" p-3">累计时长：<span class="duration"></span></div>
                 <!--        operation-->
                 <div class="flex flex-col items-start gap-3">
                     <div class=" flex  gap-3">
@@ -252,7 +527,14 @@
             </div>
         </div>
 
-        <div id="recharge" class="hidden"></div>
+        <div id="recharge" class="hidden">
+            <div class="flex  items-center gap-3">
+                <input type="text" placeholder="充值月份" class="border p-3 rounded-xl text-black" id="month"/>
+                <button class="border rounded-xl bg-green-400 p-3 hover:bg-green-400/90" onclick="recharge()">充值
+                </button>
+            </div>
+            <img class="size-50 object-cover rounded-2xl mt-5" id="qrCode"/>
+        </div>
 
     </div>
     <div id="loginSection" class="hidden bg-white/50 size-full z-99 fixed top-0  flex items-center justify-center">
