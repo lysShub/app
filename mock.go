@@ -32,6 +32,7 @@ func (i *Mock) init() *Mock {
 	if err != nil && !os.IsNotExist(err) {
 		panic(err)
 	}
+	fmt.Println("store path", i.storePath())
 
 	if os.IsNotExist(err) {
 		i.Games = map[GameId]GameInfo{
@@ -110,7 +111,7 @@ func (i *Mock) gameIdValid(id GameId) bool {
 	_, has := i.Games[id]
 	return has
 }
-func (i *Mock) logined() bool { return i.User.Name == "" }
+func (i *Mock) logined() bool { return i.User.Name != "" }
 
 func (a *Mock) GetUser() (info UserInfo, msg Message) {
 	if !a.logined() {
@@ -310,9 +311,6 @@ func (a *Mock) Stats() (s Stats) {
 		Ping1:         time.Duration(RandNew.Intn(200) + 101),
 		Ping2:         time.Duration(RandNew.Intn(200) + 101),
 	}
-}
-func main() {
-	print(RandNew.Intn(300) + 1)
 }
 
 func roundToTwoDecimalPlaces(f float64) float64 {

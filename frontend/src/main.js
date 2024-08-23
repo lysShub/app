@@ -1,8 +1,8 @@
 
-function getUser() {
+function GetUser() {
     return window.go.main.App.GetUser()
 }
-function registerOrLogin(username, password) {
+function RegisterOrLogin(username, password) {
     return window.go.main.App.RegisterOrLogin(username, password)
 }
 function ListGames() {
@@ -21,16 +21,16 @@ function SelectGame(game) {
 function Accelerate(game) {
     return window.go.main.App.Accelerate(game)
 }
-function DisableAccelerate(){
+function DisableAccelerate() {
     return window.go.main.App.DisableAccelerate()
 }
-function Recharge(arg1,arg2){
-    return window.go.main.App.Recharge(arg1,arg2)
+function Recharge(arg1, arg2) {
+    return window.go.main.App.Recharge(arg1, arg2)
 }
 
-function EventListener(eventName,callback){
-    return EventsOn(eventName,callback)
+function EventListener(eventName, callback) {
+    return EventsOn(eventName, callback)
 }
-function GetStats(){
+function GetStats() {
     return window.go.main.App.Stats()
 }

@@ -2,12 +2,12 @@
 <html class="" lang=>
 
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=Edge, Chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgo=">
     <!-- Main Source Files -->
-    <link rel="stylesheet" href="main.css"/>
+    <link rel="stylesheet" href="main.css" />
     <script src="main.js"></script>
     <script src="assets/js/3.4.5"></script>
     <script src="/wails/runtime.js"></script>
@@ -38,7 +38,7 @@
 
         function toggleTabSwitch(name) {
             let tabs = ['ing', 'begin', 'recharge']
-            if (name == 'ing'){
+            if (name == 'ing') {
                 getStats()
             } else {
                 clearAllInterval()
@@ -141,7 +141,7 @@
         }
 
         async function tryGetUser() {
-            return await getUser().then(res => {
+            return await GetUser().then(res => {
                 console.log('user', res)
                 if (res.code == 2) {
                     toggleLoginSection()
@@ -169,7 +169,7 @@
         function Login() {
             let account = document.getElementById('account').value;
             let password = document.getElementById('password').value;
-            registerOrLogin(account, password).then(res => {
+            RegisterOrLogin(account, password).then(res => {
                 // console.log('login',res)
                 if (res.code == 0) {
                     tryGetUser()
@@ -310,8 +310,8 @@
             let data5 = []
             let data6 = []
             const option2 = {
-                legend:{
-                    data:['第一阶段上行丢包','第一阶段下行丢包','第二阶段上行丢包','第二阶段下行丢包'],
+                legend: {
+                    data: ['第一阶段上行丢包', '第一阶段下行丢包', '第二阶段上行丢包', '第二阶段下行丢包'],
                     textStyle: {
                         color: '#fff'
                     }
@@ -382,7 +382,7 @@
                     data4.push([now, res.loss_downlink1])
                     data5.push([now, res.loss_uplink2])
                     data6.push([now, res.loss_downlink2])
-                    if (data1.length>100){
+                    if (data1.length > 100) {
                         data1.shift()
                         data2.shift()
                         data3.shift()
@@ -394,19 +394,19 @@
                         series: [
                             {
                                 name: '第一阶段上行丢包',
-                                data:data3
+                                data: data3
                             },
                             {
                                 name: '第一阶段下行丢包',
-                                data:data4
+                                data: data4
                             },
                             {
                                 name: '第二阶段上行丢包',
-                                data:data5
+                                data: data5
                             },
                             {
                                 name: '第二阶段下行丢包',
-                                data:data6
+                                data: data6
                             }
                         ]
                     })
@@ -415,11 +415,11 @@
                         series: [
                             {
                                 name: '阶段一',
-                                data:data1
+                                data: data1
                             },
                             {
                                 name: '整体',
-                                data:data2
+                                data: data2
                             }
                         ]
                     });
@@ -459,109 +459,105 @@
 
     </script>
 </head>
-<body class=" ">
-<div class="flex pt-10 h-screen">
-    <div class="h-full w-[300px]   border-white flex flex-col	">
-        <!--            game select-->
-        <div id="gameList" class=" flex flex-col items-center mt-5 gap-3 overflow-y-auto flex-grow">
-        </div>
-        <div class="flex items-center justify-center gap-3 hover:ring px-5 w-full cursor-pointer"
-             onclick="toggleSearchSection()">
-            + 添加游戏
-        </div>
-        <!--        user section-->
-        <div class="flex item-center gap-3 p-5 ">
-            <img src="assets/images/logo-universal.png" class="object-cover size-10 rounded-full  ring"/>
-            <div class="flex flex-col items-start">
-                <p class="line-clamp-1 break-all">昵称：<span id="userName"></span></p>
-                <p class="line-clamp-1 break-all">到期：<span id="expireDate"></span></p>
-            </div>
-        </div>
-    </div>
 
-    <div class=" ml-10" id="detailTabSection">
-        <!--        view-->
-        <div id="ing" class="hidden">
-            <div class="flex gap-3">
-                <img class=" w-[400px] h-[300px] object-cover rounded-2xl gameBg"/>
-                <button class="border rounded-xl bg-green-400 p-3 hover:bg-green-400/90" onclick="stop(this)">停止加速
-                </button>
+<body class=" ">
+    <div class="flex pt-10 h-screen">
+        <div class="h-full w-[300px]   border-white flex flex-col	">
+            <!--            game select-->
+            <div id="gameList" class=" flex flex-col items-center mt-5 gap-3 overflow-y-auto flex-grow">
             </div>
-            <div class="flex gap-3 mt-5">
-                <div class=" p-3">累计时长：<span class="duration"></span></div>
-                <div class=" p-3">加速流量：<span id="flow"></span></div>
+            <div class="flex items-center justify-center gap-3 hover:ring px-5 w-full cursor-pointer" onclick="toggleSearchSection()">
+                + 添加游戏
+            </div>
+            <!--        user section-->
+            <div class="flex item-center gap-3 p-5 ">
+                <img src="assets/images/logo-universal.png" class="object-cover size-10 rounded-full  ring" />
+                <div class="flex flex-col items-start">
+                    <p class="line-clamp-1 break-all">昵称：<span id="userName"></span></p>
+                    <p class="line-clamp-1 break-all">到期：<span id="expireDate"></span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class=" ml-10" id="detailTabSection">
+            <!--        view-->
+            <div id="ing" class="hidden">
+                <div class="flex gap-3">
+                    <img class=" w-[400px] h-[300px] object-cover rounded-2xl gameBg" />
+                    <button class="border rounded-xl bg-green-400 p-3 hover:bg-green-400/90" onclick="stop(this)">停止加速
+                    </button>
+                </div>
+                <div class="flex gap-3 mt-5">
+                    <div class=" p-3">累计时长：<span class="duration"></span></div>
+                    <div class=" p-3">加速流量：<span id="flow"></span></div>
+                    <div>
+                    </div>
+                </div>
+                <div>
+                    <!--                echart-->
+                    <div id="container1" class="h-[300px] w-[500px]"></div>
+                    <div id="container2" class="h-[300px] w-[500px]"></div>
+                </div>
                 <div>
                 </div>
             </div>
-            <div>
-                <!--                echart-->
-                <div id="container1" class="h-[300px] w-[500px]"></div>
-                <div id="container2" class="h-[300px] w-[500px]"></div>
+
+            <div id="begin" class="hidden">
+                <img class=" w-[400px] h-[300px] object-cover rounded-2xl gameBg" />
+                <div class="flex gap-3 mt-5">
+                    <div class=" p-3">最近加速：<span id="lastActive" class=""></span></div>
+                    <div class=" p-3">累计时长：<span class="duration"></span></div>
+                    <!--        operation-->
+                    <div class="flex flex-col items-start gap-3">
+                        <div class=" flex  gap-3">
+                            <select class=" p-3 rounded-xl bg-transparent" id="serverList" required>
+
+                            </select>
+                        </div>
+                        <div>
+                            <input type="radio" name="gender" checked value="apple" id='1'><label for="1">固定路由</label></br>
+                            <input type="radio" name="gender" checked value="apple" id='2'><label for="2">智能路由</label>
+                        </div>
+                        <button class="border rounded-xl bg-green-400 p-3 hover:bg-green-400/90" onclick="begin(this)">
+                            加速游戏
+                        </button>
+
+                    </div>
+                </div>
             </div>
-            <div>
+
+            <div id="recharge" class="hidden">
+                <div class="flex  items-center gap-3">
+                    <input type="text" placeholder="充值月份" class="border p-3 rounded-xl text-black" id="month" />
+                    <button class="border rounded-xl bg-green-400 p-3 hover:bg-green-400/90" onclick="recharge()">充值
+                    </button>
+                </div>
+                <img class="size-50 object-cover rounded-2xl mt-5" id="qrCode" />
+            </div>
+
+        </div>
+        <div id="loginSection" class="hidden bg-white/50 size-full z-99 fixed top-0  flex items-center justify-center">
+            <div class="bg-white px-10 py-5 rounded-2xl ">
+                <div class="flex flex-col items-center gap-3">
+                    <input type="text" placeholder="账号" class="border p-3 rounded-xl text-black" id="account" />
+                    <input type="password" placeholder="密码" class="border p-3 rounded-xl text-black" id="password" />
+                    <button class="border rounded-xl bg-green-400 p-3 hover:bg-green-400/90" onclick="Login()">登录</button>
+                </div>
             </div>
         </div>
-
-        <div id="begin" class="hidden">
-            <img class=" w-[400px] h-[300px] object-cover rounded-2xl gameBg"/>
-            <div class="flex gap-3 mt-5">
-                <div class=" p-3">最近加速：<span id="lastActive" class=""></span></div>
-                <div class=" p-3">累计时长：<span class="duration"></span></div>
-                <!--        operation-->
-                <div class="flex flex-col items-start gap-3">
-                    <div class=" flex  gap-3">
-                        <select class=" p-3 rounded-xl bg-transparent" id="serverList" required>
-
-                        </select>
-                    </div>
-                    <div>
-                        <input type="radio" name="gender" checked value="apple" id='1'><label
-                            for="1">固定路由</label></br>
-                        <input type="radio" name="gender" checked value="apple" id='2'><label for="2">智能路由</label>
-                    </div>
-                    <button class="border rounded-xl bg-green-400 p-3 hover:bg-green-400/90" onclick="begin(this)">
-                        加速游戏
+        <div id="searchSection" class=" bg-white/50 size-full z-99 fixed top-0  flex items-center justify-center hidden">
+            <div class="bg-white px-3 py-5 rounded-2xl flex flex-col items-center gap-3 w-[60%]">
+                <div class="flex justify-center border-b-2 w-full items-center">
+                    <input type="text" placeholder="搜索某一款游戏" class=" p-3 rounded-xl text-black w-[32]" id="search" onchange="searchGameList()" />
+                    <button class=" top-3 right-3 bg-red-400 size-4 rounded-full text-white hover:bg-red-400/90 flex items-center justify-center" onclick="toggleSearchSection()">x
                     </button>
-
+                </div>
+                <div id="searchResult" class=" overflow-y-auto max-h-[16]	   text-black  p-3 rounded-xl text-black w-[80%]  flex flex-col gap-3	 ">
                 </div>
             </div>
         </div>
 
-        <div id="recharge" class="hidden">
-            <div class="flex  items-center gap-3">
-                <input type="text" placeholder="充值月份" class="border p-3 rounded-xl text-black" id="month"/>
-                <button class="border rounded-xl bg-green-400 p-3 hover:bg-green-400/90" onclick="recharge()">充值
-                </button>
-            </div>
-            <img class="size-50 object-cover rounded-2xl mt-5" id="qrCode"/>
-        </div>
-
     </div>
-    <div id="loginSection" class="hidden bg-white/50 size-full z-99 fixed top-0  flex items-center justify-center">
-        <div class="bg-white px-10 py-5 rounded-2xl ">
-            <div class="flex flex-col items-center gap-3">
-                <input type="text" placeholder="账号" class="border p-3 rounded-xl text-black" id="account"/>
-                <input type="password" placeholder="密码" class="border p-3 rounded-xl text-black" id="password"/>
-                <button class="border rounded-xl bg-green-400 p-3 hover:bg-green-400/90" onclick="Login()">登录</button>
-            </div>
-        </div>
-    </div>
-    <div id="searchSection" class=" bg-white/50 size-full z-99 fixed top-0  flex items-center justify-center hidden">
-        <div class="bg-white px-3 py-5 rounded-2xl flex flex-col items-center gap-3 w-[60%]">
-            <div class="flex justify-center border-b-2 w-full items-center">
-                <input type="text" placeholder="搜索某一款游戏" class=" p-3 rounded-xl text-black w-[32]" id="search"
-                       onchange="searchGameList()"/>
-                <button class=" top-3 right-3 bg-red-400 size-4 rounded-full text-white hover:bg-red-400/90 flex items-center justify-center"
-                        onclick="toggleSearchSection()">x
-                </button>
-            </div>
-            <div id="searchResult"
-                 class=" overflow-y-auto max-h-[16]	   text-black  p-3 rounded-xl text-black w-[80%]  flex flex-col gap-3	 ">
-            </div>
-        </div>
-    </div>
-
-</div>
 </body>
 
 </html>
