@@ -7,7 +7,7 @@
 # ...to re-init the ignore list
 
 # Wails directories
-
+build
 
 # Wails junk files
 .syso
@@ -17,7 +17,7 @@ go.sum
 
 # IDEs
 .idea
-.vscode
+
 
 # System enviroment variables
 env

@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -25,6 +26,7 @@ type Mock struct {
 
 	// temp
 	qrImgPath string
+	statsTime time.Time
 }
 
 func (i *Mock) init() *Mock {
@@ -199,8 +201,14 @@ func (a *Mock) SearchGame(keyword string) (list []GameInfo, msg Message) {
 		return nil, NotLogin.Message()
 	}
 
+	if keyword == "" {
+		return nil, OK.Message()
+	}
+
 	for _, e := range a.Games {
-		list = append(list, e)
+		if strings.ContainsAny(e.Name, keyword) {
+			list = append(list, e)
+		}
 	}
 	return list, OK.Message()
 }
@@ -303,6 +311,9 @@ func (a *Mock) DisableAccelerate() Message {
 var RandNew *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 func (a *Mock) Stats() (s Stats) {
+	time.Sleep(time.Until(a.statsTime.Add(time.Second * 3)))
+	a.statsTime = time.Now()
+
 	return Stats{
 		LossUplink1:   roundToTwoDecimalPlaces(RandNew.Float64()*50 + 51),
 		LossDownlink1: roundToTwoDecimalPlaces(RandNew.Float64()*50 + 51),
