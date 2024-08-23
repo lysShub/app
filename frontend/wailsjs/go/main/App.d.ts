@@ -10,13 +10,13 @@ export function DisableAccelerate():Promise<main.Message>;
 
 export function GetUser():Promise<main.ApiResponse>;
 
-export function ListGames():Promise<Array<main.GameInfo>>;
+export function ListGames():Promise<main.ApiResponse>;
 
 export function Recharge(arg1:number,arg2:string):Promise<string>;
 
 export function RegisterOrLogin(arg1:string,arg2:string):Promise<main.Message>;
 
-export function SearchGame(arg1:string):Promise<Array<main.GameInfo>|main.Message>;
+export function SearchGame(arg1:string):Promise<main.ApiResponse>;
 
 export function SetGame(arg1:number):Promise<main.Message>;
 

@@ -12,9 +12,9 @@ import (
 )
 
 type ApiResponse struct {
-	Code MsgCode  `json:"code"`
-	Msg  string   `json:"msg"`
-	Data UserInfo `json:"data"`
+	Code MsgCode `json:"code"`
+	Msg  string  `json:"msg"`
+	Data any     `json:"data"`
 }
 type Message struct {
 	Code MsgCode `json:"code"`
@@ -59,7 +59,14 @@ type App struct {
 	cacheSelectedIdx int
 }
 
-func NewMockApp() *App { return &App{} }
+func NewMockApp() *App {
+	return &App{
+		games: map[GameId]GameInfo{
+			1: {GameId: 1, Name: "csgo 国际服", IconPath: "assets/images/csgo.png", BgimgPath: "./xx/xx/bg.png", GameServers: []string{"电信", "联通", "移动"}},
+			2: {GameId: 2, Name: "dnf", IconPath: "assets/images/dnf.jpg", BgimgPath: "./xx/xx/bg.png", GameServers: []string{"河北", "北京", "山东"}},
+		},
+	}
+}
 
 func (a *App) startup(ctx context.Context)                    { a.ctx = ctx }
 func (a *App) domReady(ctx context.Context)                   {}
@@ -79,9 +86,7 @@ func (a *App) GetUser() ApiResponse {
 		return ApiResponse{
 			Code: NotLogin,
 			Msg:  NotLogin.String(),
-			Data: UserInfo{
-				Name: "123",
-			},
+			Data: UserInfo{},
 		}
 	} else {
 		return ApiResponse{
@@ -138,19 +143,35 @@ type GameInfo struct {
 }
 
 // ListGames 获取已添加的游戏列表, selectedIdx 表示默认应该选中的游戏
-func (a *App) ListGames() (list []GameInfo, selectedIdx int, msg Message) {
+func (a *App) ListGames() ApiResponse {
 	if !a.login.Load() {
-		return nil, -1, NotLogin.Message()
+		return ApiResponse{
+			Code: NotLogin,
+			Msg:  NotLogin.String(),
+			Data: nil,
+		}
 	}
-	return a.addedGames, a.cacheSelectedIdx, OK.Message()
+	return ApiResponse{
+		Code: OK,
+		Msg:  OK.String(),
+		Data: struct {
+			GameList    []GameInfo `json:"games"`
+			SelectedIdx int        `json:"selected_idx"`
+		}{GameList: a.addedGames, SelectedIdx: a.cacheSelectedIdx},
+	}
 }
 
 // SearchGame 根据关键字搜索游戏
-func (a *App) SearchGame(keyword string) (list []GameInfo, msg Message) {
-	for _, e := range a.games {
-		list = append(list, e)
+func (a *App) SearchGame(keyword string) ApiResponse {
+	list := make([]GameInfo, 0, len(a.games))
+	for _, info := range a.games {
+		list = append(list, info)
 	}
-	return list, OK.Message()
+	return ApiResponse{
+		Code: OK,
+		Msg:  OK.String(),
+		Data: list,
+	}
 }
 
 // AddGame 新增游戏

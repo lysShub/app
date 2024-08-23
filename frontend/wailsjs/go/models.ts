@@ -9,28 +9,10 @@ export namespace main {
 	    NotSetGame = 5,
 	    Accelerating = 6,
 	}
-	export class UserInfo {
-	    name: string;
-	    password: string;
-	    phone: string;
-	    expire: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new UserInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.name = source["name"];
-	        this.password = source["password"];
-	        this.phone = source["phone"];
-	        this.expire = source["expire"];
-	    }
-	}
 	export class ApiResponse {
 	    code: MsgCode;
 	    msg: string;
-	    data: UserInfo;
+	    data: any;
 	
 	    static createFrom(source: any = {}) {
 	        return new ApiResponse(source);
@@ -40,49 +22,7 @@ export namespace main {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.code = source["code"];
 	        this.msg = source["msg"];
-	        this.data = this.convertValues(source["data"], UserInfo);
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
-	}
-	export class GameInfo {
-	    game_id: number;
-	    name: string;
-	    icon_path: string;
-	    bgimg_path: string;
-	    game_servers: string[];
-	    cache_game_server: string;
-	    cache_fix_route: boolean;
-	
-	    static createFrom(source: any = {}) {
-	        return new GameInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.game_id = source["game_id"];
-	        this.name = source["name"];
-	        this.icon_path = source["icon_path"];
-	        this.bgimg_path = source["bgimg_path"];
-	        this.game_servers = source["game_servers"];
-	        this.cache_game_server = source["cache_game_server"];
-	        this.cache_fix_route = source["cache_fix_route"];
+	        this.data = source["data"];
 	    }
 	}
 	export class Message {
