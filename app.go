@@ -2,10 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"log/slog"
-	"slices"
-	"sync/atomic"
 	"time"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -21,7 +17,7 @@ type Message struct {
 	Msg  string  `json:"msg"`
 }
 
-//go:generate stringer -linecomment -output acc_gen.go -type=MsgCode
+//go:generate stringer -linecomment -output app_gen.go -type=MsgCode
 type MsgCode int
 
 func (c MsgCode) Message() Message { return Message{Code: c, Msg: c.String()} }
@@ -33,39 +29,72 @@ func (c MsgCode) TSName() string {
 }
 
 const (
-	OK           MsgCode = iota // ok
-	Notfound                    // not found
-	NotLogin                    // 没有登录
-	IsLogined                   // 已经登录
-	VIPExpired                  // vip 已过期
-	NotSetGame                  // 请先选择加速的游戏
-	Accelerating                // 游戏已在加速
+	OK             MsgCode = iota // ok
+	Notfound                      // not found
+	NotLogin                      // 没有登录
+	IsLogined                     // 已经登录
+	VIPExpired                    // vip 已过期
+	NotSelectGame                 // 请选择加速的游戏
+	Accelerating                  // 游戏已在加速
+	InvalidMonths                 // 无效月数
+	GameExist                     // 游戏已存在
+	NotAccelerated                // 没有加速
+	RequireGameId                 // 请指定游戏
+	Unknown                       // 未知
 	_end
 )
 
-var codeLits = []string{"OK", "Notfound", "NotLogin", "IsLogined", "VIPExpired", "NotSetGame", "Accelerating"}
-var codes = []MsgCode{OK, Notfound, NotLogin, IsLogined, VIPExpired, NotSetGame, Accelerating}
+var codeLits = []string{
+	"OK",
+	"Notfound",
+	"NotLogin",
+	"IsLogined",
+	"VIPExpired",
+	"NotSelectGame",
+	"Accelerating",
+	"InvalidMonths",
+	"GameExist",
+	"NotAccelerated",
+	"RequireGameId",
+	"Unknown",
+}
+var codes = []MsgCode{
+	OK,
+	Notfound,
+	NotLogin,
+	IsLogined,
+	VIPExpired,
+	NotSelectGame,
+	Accelerating,
+	InvalidMonths,
+	GameExist,
+	NotAccelerated,
+	RequireGameId,
+	Unknown,
+}
+
+type GameId = int32 // 最小值为1
+
+type GameInfo struct {
+	GameId      GameId   `json:"game_id"`
+	Name        string   `json:"name"`
+	IconPath    string   `json:"icon_path"`
+	BgimgPath   string   `json:"bgimg_path"`
+	GameServers []string `json:"game_servers"`
+
+	CacheGameServer string `json:"cache_game_server"`
+	CacheFixRoute   bool   `json:"cache_fix_route"`
+	LastActive      int64  `json:"last_active"` // utc 时间戳
+	Duration        int64  `json:"duration"`
+}
 
 type App struct {
 	ctx context.Context
-
-	login                     atomic.Bool
-	username, password, phone string
-	expire                    time.Time
-
-	game             atomic.Int32 // store GameId
-	games            map[GameId]GameInfo
-	addedGames       []GameInfo
-	cacheSelectedIdx int
+	*Mock
 }
 
 func NewMockApp() *App {
-	return &App{
-		games: map[GameId]GameInfo{
-			1: {GameId: 1, Name: "csgo 国际服", IconPath: "assets/images/csgo.png", BgimgPath: "./xx/xx/bg.png", GameServers: []string{"电信", "联通", "移动"}},
-			2: {GameId: 2, Name: "dnf", IconPath: "assets/images/dnf.jpg", BgimgPath: "./xx/xx/bg.png", GameServers: []string{"河北", "北京", "山东"}},
-		},
-	}
+	return &App{Mock: (&Mock{}).init()}
 }
 
 func (a *App) startup(ctx context.Context)                    { a.ctx = ctx }
@@ -81,184 +110,105 @@ type UserInfo struct {
 }
 
 // GetUser 获取用户信息, 应用渲染完成即调用此函数, 如果msg.Code==NotLogin, 则弹出注册登录页面
+
 func (a *App) GetUser() ApiResponse {
-	if !a.login.Load() {
-		return ApiResponse{
-			Code: NotLogin,
-			Msg:  NotLogin.String(),
-			Data: UserInfo{},
-		}
-	} else {
-		return ApiResponse{
-			Code: OK,
-			Msg:  OK.String(),
-			Data: UserInfo{
-				Name:     a.username,
-				Password: a.password,
-				Phone:    a.phone,
-				Expire:   a.expire.Unix(),
-			},
-		}
+	user, message := a.Mock.GetUser()
+	return ApiResponse{
+		Code: message.Code,
+		Msg:  message.Msg,
+		Data: user,
 	}
 }
 
 // RegisterOrLogin 注册或登录,
 func (a *App) RegisterOrLogin(user, pwd string) (msg Message) {
-	if a.login.Swap(true) {
-		return IsLogined.Message()
-	} else {
-		a.username = user
-		a.password = pwd
-		a.phone = "1378494xxxxx"
-		a.expire = time.Now().Add(time.Hour * 24)
-		slog.Info("log", slog.String("user", user), slog.String("pwd", pwd))
-		return OK.Message()
-	}
+	return a.Mock.RegisterOrLogin(user, pwd)
 }
 
 // todo: 暂时不考虑
 // Recharge 充值，返回一个字符二维码、和一个全局事件。参考 https://wails.io/zh-Hans/docs/reference/runtime/events
 // 回调返回结果是Message类型
-func (a *App) Recharge(months int, eventName string) (qrImagePath string) {
-	go func() {
-		// 等待支付结果
-		runtime.EventsEmit(context.Background(), eventName, Message{Code: OK, Msg: "支付成功"})
-	}()
-
-	return "./xx/xx/qr.png"
-}
-
-type GameId = int32 // 最小值为1
-
-type GameInfo struct {
-	GameId      GameId   `json:"game_id"`
-	Name        string   `json:"name"`
-	IconPath    string   `json:"icon_path"`
-	BgimgPath   string   `json:"bgimg_path"`
-	GameServers []string `json:"game_servers"`
-
-	// 表示上次代理配置
-	CacheGameServer string `json:"cache_game_server"`
-	CacheFixRoute   bool   `json:"cache_fix_route"`
+func (a *App) Recharge(months int, eventName string) (qrImagePath string, msg Message) {
+	return a.Mock.Recharge(months, func(m Message) {
+		runtime.EventsEmit(a.ctx, eventName, m)
+	})
 }
 
 // ListGames 获取已添加的游戏列表, selectedIdx 表示默认应该选中的游戏
+
 func (a *App) ListGames() ApiResponse {
-	if !a.login.Load() {
-		return ApiResponse{
-			Code: NotLogin,
-			Msg:  NotLogin.String(),
-			Data: nil,
-		}
-	}
+	list, idx, msg := a.Mock.ListGames()
 	return ApiResponse{
-		Code: OK,
-		Msg:  OK.String(),
+		Code: msg.Code,
+		Msg:  msg.Msg,
 		Data: struct {
-			GameList    []GameInfo `json:"games"`
+			List        []GameInfo `json:"list"`
 			SelectedIdx int        `json:"selected_idx"`
-		}{GameList: a.addedGames, SelectedIdx: a.cacheSelectedIdx},
+		}{
+			List:        list,
+			SelectedIdx: idx,
+		},
+	}
+}
+
+// SelectGame 选中某个游戏
+func (a *App) SelectGame(gameId GameId) ApiResponse {
+	game, message := a.Mock.SelectGame(gameId)
+	return ApiResponse{
+		Code: message.Code,
+		Msg:  message.Msg,
+		Data: game,
+	}
+}
+
+// GetSelectedGame 获取当前选中的游戏
+func (a *App) GetSelectedGame() ApiResponse {
+	game, message := a.Mock.GetSelectedGame()
+	return ApiResponse{
+		Code: message.Code,
+		Msg:  message.Msg,
+		Data: game,
 	}
 }
 
 // SearchGame 根据关键字搜索游戏
 func (a *App) SearchGame(keyword string) ApiResponse {
-	list := make([]GameInfo, 0, len(a.games))
-	for _, info := range a.games {
-		list = append(list, info)
-	}
+	game, message := a.Mock.SearchGame(keyword)
 	return ApiResponse{
-		Code: OK,
-		Msg:  OK.String(),
-		Data: list,
+		Code: message.Code,
+		Msg:  message.Msg,
+		Data: game,
 	}
 }
 
 // AddGame 新增游戏
 func (a *App) AddGame(gameId GameId) Message {
-	info, has := a.games[gameId]
-	if !has {
-		invalidGameID(gameId)
-	}
-
-	a.addedGames = append(a.addedGames, info)
-	return OK.Message()
+	return a.Mock.AddGame(gameId)
 }
 
 // SetGame 选择某个游戏
 func (a *App) SetGame(gameId GameId) Message {
-	if _, has := a.games[gameId]; has {
-		invalidGameID(gameId)
-	}
-	a.game.Store(gameId)
-	return OK.Message()
-}
-
-func invalidGameID(id GameId) {
-	panic(fmt.Sprintf("not found game id %d", id))
+	return a.Mock.SetGame(gameId)
 }
 
 // SetGameServer 设置游戏区服
 func (a *App) SetGameServer(id GameId, gameServer string) Message {
-	var idx int = -1
-	var info GameInfo
-	for i, e := range a.addedGames {
-		if e.GameId == id {
-			idx, info = i, e
-			break
-		}
-	}
-	if idx == -1 {
-		invalidGameID(id)
-	}
-	if !slices.Contains(info.GameServers, gameServer) {
-		return Message{Code: Notfound, Msg: fmt.Sprintf("不支持 %s 区服：%s", info.Name, gameServer)}
-	}
-	a.addedGames[idx].CacheGameServer = gameServer
-
-	return OK.Message()
+	return a.Mock.SetGameServer(id, gameServer)
 }
 
 // SetRouteMode 选择路由模式
 func (a *App) SetRouteMode(id GameId, fixRoute bool) Message {
-	var idx int = -1
-	for i, e := range a.addedGames {
-		if e.GameId == id {
-			idx = i
-			break
-		}
-	}
-	if idx == -1 {
-		invalidGameID(id)
-	}
-	a.addedGames[idx].CacheFixRoute = fixRoute
-
-	return OK.Message()
+	return a.Mock.SetRouteMode(id, fixRoute)
 }
 
 // Accelerate 开始加速
 func (a *App) Accelerate(id GameId) Message {
-	if !a.game.CompareAndSwap(0, id) {
-		info, has := a.games[a.game.Load()]
-		if !has {
-			invalidGameID(a.game.Load())
-		}
-		return Message{Code: Accelerating, Msg: fmt.Sprintf("%s 正在加速", info.Name)}
-	}
-
-	info, has := a.games[id]
-	if !has {
-		invalidGameID(id)
-	}
-	slog.Info("开始加速", slog.String("name", info.Name), slog.String("server", info.CacheGameServer), slog.Bool("fix-route", info.CacheFixRoute))
-
-	return OK.Message()
+	return a.Mock.Accelerate(id)
 }
 
 // DisableAccelerate 停止加速
 func (a *App) DisableAccelerate() Message {
-	a.game.Swap(0)
-	return OK.Message()
+	return a.Mock.DisableAccelerate()
 }
 
 type Stats struct {
@@ -274,7 +224,7 @@ type Stats struct {
 	Ping2         time.Duration `json:"ping2"`          // 整体延时
 }
 
-// Stats 获取统计信息
+// Stats 获取统计信息, 阻塞函数, 如果距上次调用时间短于3s, 会主动阻塞直到恰好相距3s
 func (a *App) Stats() (s Stats) {
-	return Stats{}
+	return a.Mock.Stats()
 }

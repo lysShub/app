@@ -14,3 +14,6 @@ function SearchGame(game) {
 function AddGame(game) {
     return window.go.main.App.AddGame(game)
 }
+function SelectGame(game) {
+    return window.go.main.App.SelectGame(game)
+}

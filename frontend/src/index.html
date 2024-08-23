@@ -11,11 +11,15 @@
     <script src="main.js"></script>
     <script src="assets/js/3.4.5"></script>
     <script>
+
         function addGame(gameId) {
-            console.log('add game', gameId)
             AddGame(gameId).then(res => {
+                console.log('add game', res)
                 if (res.code == 0) {
                     getGameList()
+                    alert('添加成功')
+                } else {
+                    alert(res.msg)
                 }
             })
         }
@@ -57,6 +61,16 @@
             document.getElementById('searchSection').classList.toggle('hidden')
         }
 
+        function transHumanTime (time) {
+            let i = 0;
+            let unit = ["秒", "分钟", "小时", "天", "月", "年"];
+            while (time > 60) {
+                time /= 60;
+                i++;
+            }
+            return `${time.toFixed(2)}${unit[i]}`;
+        }
+
         function formatDateTime(time, format) {
             let date = new Date(time)
             let year = date.getFullYear()
@@ -66,7 +80,6 @@
             let minute = date.getMinutes()
             let second = date.getSeconds()
             return format.replace('yyyy', year).replace('MM', month).replace('dd', day).replace('HH', hour).replace('mm', minute).replace('ss', second)
-
         }
 
 
@@ -76,7 +89,7 @@
                 if (res.code != 0) {
                     return false
                 }
-                let result = res.data.games;
+                let result = res.data.list;
                 if (!result) {
                     return false
                 }
@@ -142,6 +155,24 @@
             e.classList.add('bg-green-400')
             toggleTabSwitch('begin')
             let gameId = e.getAttribute('gameId')
+
+            SelectGame(parseInt(gameId)).then(res => {
+                console.log('select game', res)
+                if (res.code ==0) {
+                    document.getElementById('gameBg').src = res.data.bgimg_path
+                    document.getElementById('lastActive').innerText = formatDateTime(new Date(res.data.last_active * 1000), 'yyyy年MM月dd日 HH:mm:ss')
+                    document.getElementById('duration').innerText = transHumanTime(res.data.duration)
+                    let serverList = document.getElementById('serverList')
+                    serverList.innerHTML = ''
+                    res.data.game_servers.forEach(server => {
+                        let option = document.createElement('option')
+                        option.value = server
+                        option.innerText = server
+                        serverList.appendChild(option)
+                    })
+                }
+            })
+
         }
 
         function begin(e) {
@@ -160,11 +191,6 @@
     <div class="h-full w-[300px]   border-white flex flex-col	">
         <!--            game select-->
         <div id="gameList" class=" flex flex-col items-center mt-5 gap-3 overflow-y-auto flex-grow">
-
-            <div class="flex items-center justify-center gap-3 hover:ring  px-5 w-full" onclick="selectGame(this)">
-                <img src="assets/images/csgo.png" class="object-cover size-10 "/>
-                <span>csgo 国际服</span>
-            </div>
         </div>
         <div class="flex items-center justify-center gap-3 hover:ring px-5 w-full cursor-pointer"
              onclick="toggleSearchSection()">
@@ -194,15 +220,14 @@
                 </div>
             </div>
             <div>
-
             </div>
         </div>
 
         <div id="begin" class="hidden">
-            <div class="border w-[400px] py-10">CS GO 国服</div>
+            <img class=" w-[400px] h-[300px] object-cover rounded-2xl" id="gameBg"/>
             <div class="flex gap-3 mt-5">
-                <div class="border p-3">最近加速：<span>2020-01-02 01：1：:01</span></div>
-                <div class="border p-3">累计时长：<span>001小时 01 分</span></div>
+                <div class="border p-3">最近加速：<span id="lastActive" class="">2020-01-02 01：1：:01</span></div>
+                <div class="border p-3">累计时长：<span id="duration">001小时 01 分</span></div>
             </div>
 
             <div>
@@ -210,12 +235,8 @@
                 <!--        operation-->
                 <div class="flex flex-col items-start gap-3">
                     <div class=" flex  gap-3">
-                        <select class=" p-3 rounded-xl bg-transparent" required>
-                            <option class="hidden" checked>选择区服</option>
-                            <option>加速节点2</option>
-                            <option>加速节点3</option>
-                            <option>加速节点4</option>
-                            <option>加速节点5</option>
+                        <select class=" p-3 rounded-xl bg-transparent" id="serverList" required>
+
                         </select>
                     </div>
                     <div>

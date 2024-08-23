@@ -14,6 +14,10 @@ export function DisableAccelerate() {
   return window['go']['main']['App']['DisableAccelerate']();
 }
 
+export function GetSelectedGame() {
+  return window['go']['main']['App']['GetSelectedGame']();
+}
+
 export function GetUser() {
   return window['go']['main']['App']['GetUser']();
 }
@@ -32,6 +36,10 @@ export function RegisterOrLogin(arg1, arg2) {
 
 export function SearchGame(arg1) {
   return window['go']['main']['App']['SearchGame'](arg1);
+}
+
+export function SelectGame(arg1) {
+  return window['go']['main']['App']['SelectGame'](arg1);
 }
 
 export function SetGame(arg1) {
