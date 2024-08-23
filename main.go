@@ -53,7 +53,7 @@ func main() {
 		OnShutdown:        app.shutdown,
 		WindowStartState:  options.Normal,
 		Bind: []interface{}{
-			app, // &msg.StatisticsFields{},
+			app,
 		},
 		EnumBind: []interface{}{
 			codes,

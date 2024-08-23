@@ -218,21 +218,30 @@ func (a *App) DisableAccelerate() Message {
 	return a.Mock.DisableAccelerate()
 }
 
-type Stats struct {
-	GatewayLocation    string `json:"gateway_location"`
-	DestinatioLocation string `json:"destinatio_location"`
-	GameServerLocation string `json:"gameserver_location"`
+type StatsList struct {
+	List []Stats `json:"list"`
+}
 
-	LossUplink1   float64       `json:"loss_uplink1"`   // 第一阶段上行丢包
-	LossDownlink1 float64       `json:"loss_downlink1"` // 第一阶段下行丢包
-	LossUplink2   float64       `json:"loss_uplink2"`   // 第二阶段上行丢包
-	LossDownlink2 float64       `json:"loss_downlink2"` // 第二阶段下行丢包
-	Ping1         time.Duration `json:"ping1"`          // 第一阶段延时
-	Ping2         time.Duration `json:"ping2"`          // 整体延时
+type Stats struct {
+	Stamp   int    `json:"stamp"`   // 本数据点对应的时间戳
+	Gateway string `json:"gateway"` // gateway所在城市名
+	Forward string `json:"forward"` // forward所在城市名
+	Server  string `json:"server"`  // server所在城市名
+
+	PingGateway time.Duration `json:"ping_gateway"` // 到gateway的延时
+	PingForward time.Duration `json:"ping_forward"` // 到forward的延时
+
+	Uplink   Loss `json:"uplink"`   // 上行丢包
+	Donwlink Loss `json:"donwlink"` // 下行丢包
+	Total    Loss `json:"total"`    // 合计丢包
+}
+
+type Loss struct {
+	Gateway float64 `json:"gateway"` // client-gateway 的丢包
+	Forward float64 `json:"forward"` // gateway-forward的丢包
 }
 
 // Stats 获取统计信息, 阻塞函数, 如果距上次调用时间短于3s, 会主动阻塞直到恰好相距3s
-func (a *App) Stats() (s Stats) {
-	stats := a.Mock.Stats()
-	return stats
+func (a *App) Stats() StatsList {
+	return a.Mock.Stats()
 }

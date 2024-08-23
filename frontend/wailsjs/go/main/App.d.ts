@@ -28,4 +28,4 @@ export function SetGameServer(arg1:number,arg2:string):Promise<main.Message>;
 
 export function SetRouteMode(arg1:number,arg2:boolean):Promise<main.Message>;
 
-export function Stats():Promise<main.Stats>;
+export function Stats():Promise<main.StatsList>;

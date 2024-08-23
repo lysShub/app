@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"math"
 	"math/rand"
 	"os"
 	"path/filepath"
 	"slices"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -27,6 +27,7 @@ type Mock struct {
 	// temp
 	qrImgPath string
 	statsTime time.Time
+	head      *Heap[Stats]
 }
 
 func (i *Mock) init() *Mock {
@@ -69,7 +70,6 @@ func (i *Mock) init() *Mock {
 				Flow:        33000,
 			},
 		}
-		i.qrImgPath = "./assets/images/qr-alipay-img.png"
 	} else {
 		if err := gob.NewDecoder(fh).Decode(i); err != nil {
 			panic(err)
@@ -77,6 +77,9 @@ func (i *Mock) init() *Mock {
 		i.AcceleratedGame = 0
 	}
 
+	i.qrImgPath = "./assets/images/qr-alipay-img.png"
+	i.statsTime = time.Time{}
+	i.head = NewHeap[Stats]()
 	return i
 }
 
@@ -310,22 +313,64 @@ func (a *Mock) DisableAccelerate() Message {
 
 var RandNew *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
-func (a *Mock) Stats() (s Stats) {
+func (a *Mock) Stats() (s StatsList) {
 	time.Sleep(time.Until(a.statsTime.Add(time.Second * 3)))
 	a.statsTime = time.Now()
 
-	return Stats{
-		LossUplink1:   roundToTwoDecimalPlaces(RandNew.Float64()*50 + 51),
-		LossDownlink1: roundToTwoDecimalPlaces(RandNew.Float64()*50 + 51),
-		LossUplink2:   roundToTwoDecimalPlaces(RandNew.Float64()*50 + 51),
-		LossDownlink2: roundToTwoDecimalPlaces(RandNew.Float64()*50 + 51),
-		Ping1:         time.Duration(RandNew.Intn(200) + 101),
-		Ping2:         time.Duration(RandNew.Intn(200) + 101),
+	a.head.Put(randStats())
+	return StatsList{List: a.head.List()}
+}
+
+func randStats() Stats {
+	var s = Stats{
+		Stamp:   int(time.Now().Unix()),
+		Gateway: "北京",
+		Forward: "莫斯科",
+		Server:  "圣彼得堡",
+	}
+
+	s.PingGateway = time.Millisecond*60 + time.Duration(rand.Intn(60))*time.Millisecond
+	s.PingForward = s.PingForward + 90*time.Millisecond
+
+	s.Uplink = Loss{
+		Gateway: f(1.5 + rand.Float64()*3),
+		Forward: f(rand.Float64()),
+	}
+	s.Donwlink = Loss{
+		Gateway: f(0.5 + rand.Float64()),
+		Forward: f(rand.Float64()),
+	}
+	s.Total = Loss{
+		Gateway: f(s.Uplink.Gateway + s.Donwlink.Gateway),
+		Forward: f(s.Uplink.Forward + s.Donwlink.Forward),
+	}
+	return s
+}
+
+func f(v float64) float64 { return math.Round(v*100) / 100 }
+
+type Heap[T Stats | int] struct {
+	cache []T
+	i     int // head
+}
+
+func NewHeap[T Stats | int]() *Heap[T] {
+	return &Heap[T]{
+		cache: make([]T, 60),
 	}
 }
 
-func roundToTwoDecimalPlaces(f float64) float64 {
-	str := fmt.Sprintf("%.2f", f)
-	result, _ := strconv.ParseFloat(str, 64)
-	return result
+func (h *Heap[T]) Put(s T) {
+	h.cache[h.i] = s
+
+	n := len(h.cache)
+	h.i = (h.i + 1) % n
+}
+
+func (h *Heap[T]) List() []T {
+	var ss = make([]T, 0, len(h.cache))
+
+	ss = append(ss, h.cache[h.i:]...)
+	ss = append(ss, h.cache[:h.i]...)
+	return ss
 }
