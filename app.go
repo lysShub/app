@@ -7,6 +7,11 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
+type ApiResponse struct {
+	Code MsgCode `json:"code"`
+	Msg  string  `json:"msg"`
+	Data any     `json:"data"`
+}
 type Message struct {
 	Code MsgCode `json:"code"`
 	Msg  string  `json:"msg"`
@@ -79,6 +84,10 @@ type GameInfo struct {
 
 	CacheGameServer string `json:"cache_game_server"`
 	CacheFixRoute   bool   `json:"cache_fix_route"`
+	LastActive      int64  `json:"last_active"` // utc 时间戳
+	Duration        int64  `json:"duration"`
+	//流量
+	Flow int64 `json:"flow"`
 }
 
 type App struct {
@@ -96,15 +105,21 @@ func (a *App) beforeClose(ctx context.Context) (prevent bool) { return false }
 func (a *App) shutdown(ctx context.Context)                   {}
 
 type UserInfo struct {
-	Name     string
-	Password string
-	Phone    string
-	Expire   int64 // utc 时间戳
+	Name     string `json:"name"`
+	Password string `json:"password"`
+	Phone    string `json:"phone"`
+	Expire   int64  `json:"expire"` // utc 时间戳
 }
 
 // GetUser 获取用户信息, 应用渲染完成即调用此函数, 如果msg.Code==NotLogin, 则弹出注册登录页面
-func (a *App) GetUser() (info UserInfo, msg Message) {
-	return a.Mock.GetUser()
+
+func (a *App) GetUser() ApiResponse {
+	user, message := a.Mock.GetUser()
+	return ApiResponse{
+		Code: message.Code,
+		Msg:  message.Msg,
+		Data: user,
+	}
 }
 
 // RegisterOrLogin 注册或登录,
@@ -115,30 +130,62 @@ func (a *App) RegisterOrLogin(user, pwd string) (msg Message) {
 // todo: 暂时不考虑
 // Recharge 充值，返回一个字符二维码、和一个全局事件。参考 https://wails.io/zh-Hans/docs/reference/runtime/events
 // 回调返回结果是Message类型
-func (a *App) Recharge(months int, eventName string) (qrImagePath string, msg Message) {
-	return a.Mock.Recharge(months, func(m Message) {
+func (a *App) Recharge(months int, eventName string) ApiResponse {
+	path, message := a.Mock.Recharge(months, func(m Message) {
 		runtime.EventsEmit(a.ctx, eventName, m)
 	})
+	return ApiResponse{
+		Code: message.Code,
+		Msg:  message.Msg,
+		Data: path,
+	}
 }
 
 // ListGames 获取已添加的游戏列表, selectedIdx 表示默认应该选中的游戏
-func (a *App) ListGames() (list []GameInfo, selectedIdx int, msg Message) {
-	return a.Mock.ListGames()
+
+func (a *App) ListGames() ApiResponse {
+	list, idx, msg := a.Mock.ListGames()
+	return ApiResponse{
+		Code: msg.Code,
+		Msg:  msg.Msg,
+		Data: struct {
+			List        []GameInfo `json:"list"`
+			SelectedIdx int        `json:"selected_idx"`
+		}{
+			List:        list,
+			SelectedIdx: idx,
+		},
+	}
 }
 
 // SelectGame 选中某个游戏
-func (a *App) SelectGame(gameId GameId) (GameInfo, Message) {
-	return a.Mock.SelectGame(gameId)
+func (a *App) SelectGame(gameId GameId) ApiResponse {
+	game, message := a.Mock.SelectGame(gameId)
+	return ApiResponse{
+		Code: message.Code,
+		Msg:  message.Msg,
+		Data: game,
+	}
 }
 
 // GetSelectedGame 获取当前选中的游戏
-func (a *App) GetSelectedGame() (GameInfo, Message) {
-	return a.Mock.GetSelectedGame()
+func (a *App) GetSelectedGame() ApiResponse {
+	game, message := a.Mock.GetSelectedGame()
+	return ApiResponse{
+		Code: message.Code,
+		Msg:  message.Msg,
+		Data: game,
+	}
 }
 
 // SearchGame 根据关键字搜索游戏
-func (a *App) SearchGame(keyword string) (list []GameInfo, msg Message) {
-	return a.Mock.SearchGame(keyword)
+func (a *App) SearchGame(keyword string) ApiResponse {
+	game, message := a.Mock.SearchGame(keyword)
+	return ApiResponse{
+		Code: message.Code,
+		Msg:  message.Msg,
+		Data: game,
+	}
 }
 
 // AddGame 新增游戏
@@ -186,5 +233,6 @@ type Stats struct {
 
 // Stats 获取统计信息, 阻塞函数, 如果距上次调用时间短于3s, 会主动阻塞直到恰好相距3s
 func (a *App) Stats() (s Stats) {
-	return a.Mock.Stats()
+	stats := a.Mock.Stats()
+	return stats
 }

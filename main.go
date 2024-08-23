@@ -65,6 +65,7 @@ func main() {
 			DisableWindowIcon:    false,
 			// DisableFramelessWindowDecorations: false,
 			WebviewUserDataPath: "",
+			Theme:               windows.Dark,
 		},
 		// Mac platform specific options
 		Mac: &mac.Options{

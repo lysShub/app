@@ -7,9 +7,11 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"time"
 )
 
@@ -30,6 +32,7 @@ func (i *Mock) init() *Mock {
 	if err != nil && !os.IsNotExist(err) {
 		panic(err)
 	}
+	fmt.Println("store path", i.storePath())
 
 	if os.IsNotExist(err) {
 		i.Games = map[GameId]GameInfo{
@@ -39,6 +42,9 @@ func (i *Mock) init() *Mock {
 				IconPath:    "./assets/images/images/csgo-icon.png",
 				BgimgPath:   "./assets/images/images/csgo-bg.jpg",
 				GameServers: []string{"美服", "欧服", "亚服"},
+				LastActive:  time.Now().Local().AddDate(0, 0, 0).Unix(),
+				Duration:    1000,
+				Flow:        1000,
 			},
 			2: {
 				GameId:      1,
@@ -46,12 +52,19 @@ func (i *Mock) init() *Mock {
 				IconPath:    "./assets/images/images/dnf-icon.png",
 				BgimgPath:   "./assets/images/images/dnf-bg.jpg",
 				GameServers: []string{"台服", "北美服", "日服"},
+				LastActive:  time.Now().Local().AddDate(-1, 0, 0).Unix(),
+				Duration:    3000,
+				Flow:        20000,
 			},
 			3: {
-				GameId:    3,
-				Name:      "绝地求生",
-				IconPath:  "./assets/images/images/pubg-icon.png",
-				BgimgPath: "./assets/images/images/pubg-bg.jpg",
+				GameId:      3,
+				Name:        "绝地求生",
+				IconPath:    "./assets/images/images/pubg-icon.png",
+				BgimgPath:   "./assets/images/images/pubg-bg.jpg",
+				GameServers: []string{"国际服", "国服", "日服"},
+				LastActive:  time.Now().Local().AddDate(-1, -2, 0).Unix(),
+				Duration:    2000,
+				Flow:        33000,
 			},
 		}
 		i.qrImgPath = "./assets/images/qr-alipay-img.png"
@@ -98,7 +111,7 @@ func (i *Mock) gameIdValid(id GameId) bool {
 	_, has := i.Games[id]
 	return has
 }
-func (i *Mock) logined() bool { return i.User.Name == "" }
+func (i *Mock) logined() bool { return i.User.Name != "" }
 
 func (a *Mock) GetUser() (info UserInfo, msg Message) {
 	if !a.logined() {
@@ -136,7 +149,6 @@ func (a *Mock) Recharge(months int, callback func(Message)) (qrImagePath string,
 			t := time.Now().Local().AddDate(0, months, 0)
 			a.User.Expire = t.Unix()
 			a.sync()
-
 			callback(Message{Code: OK, Msg: fmt.Sprintf("支付成功, 有效期至 %s", t.Format("2006-01-02T15:04:05"))})
 		} else {
 			callback(Message{Code: Unknown, Msg: "支付失败, xxxx"})
@@ -288,6 +300,21 @@ func (a *Mock) DisableAccelerate() Message {
 	return OK.Message()
 }
 
+var RandNew *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
+
 func (a *Mock) Stats() (s Stats) {
-	return Stats{}
+	return Stats{
+		LossUplink1:   roundToTwoDecimalPlaces(RandNew.Float64()*50 + 51),
+		LossDownlink1: roundToTwoDecimalPlaces(RandNew.Float64()*50 + 51),
+		LossUplink2:   roundToTwoDecimalPlaces(RandNew.Float64()*50 + 51),
+		LossDownlink2: roundToTwoDecimalPlaces(RandNew.Float64()*50 + 51),
+		Ping1:         time.Duration(RandNew.Intn(200) + 101),
+		Ping2:         time.Duration(RandNew.Intn(200) + 101),
+	}
+}
+
+func roundToTwoDecimalPlaces(f float64) float64 {
+	str := fmt.Sprintf("%.2f", f)
+	result, _ := strconv.ParseFloat(str, 64)
+	return result
 }

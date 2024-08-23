@@ -14,28 +14,20 @@ export namespace main {
 	    RequireGameId = 10,
 	    Unknown = 11,
 	}
-	export class GameInfo {
-	    game_id: number;
-	    name: string;
-	    icon_path: string;
-	    bgimg_path: string;
-	    game_servers: string[];
-	    cache_game_server: string;
-	    cache_fix_route: boolean;
+	export class ApiResponse {
+	    code: MsgCode;
+	    msg: string;
+	    data: any;
 	
 	    static createFrom(source: any = {}) {
-	        return new GameInfo(source);
+	        return new ApiResponse(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.game_id = source["game_id"];
-	        this.name = source["name"];
-	        this.icon_path = source["icon_path"];
-	        this.bgimg_path = source["bgimg_path"];
-	        this.game_servers = source["game_servers"];
-	        this.cache_game_server = source["cache_game_server"];
-	        this.cache_fix_route = source["cache_fix_route"];
+	        this.code = source["code"];
+	        this.msg = source["msg"];
+	        this.data = source["data"];
 	    }
 	}
 	export class Message {
@@ -78,18 +70,6 @@ export namespace main {
 	        this.loss_downlink2 = source["loss_downlink2"];
 	        this.ping1 = source["ping1"];
 	        this.ping2 = source["ping2"];
-	    }
-	}
-	export class UserInfo {
-	
-	
-	    static createFrom(source: any = {}) {
-	        return new UserInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	
 	    }
 	}
 
