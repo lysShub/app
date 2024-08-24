@@ -74,37 +74,3 @@ body {
     border: none;
     background-color: rgba(255, 255, 255, 1);
 }
-
-/* 以下手动添加 */
-
-
-.main {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 4px 4px 4px 4px;
-
-
-    display: flex;
-    flex-direction: row;
-    align-items: stretch;
-    justify-content: start;
-}
-
-
-.sidebar {
-    flex: 1;
-}
-
-.divider {
-    flex: 2;
-    width: 2px;
-    border-left: 1px solid rgba(128, 128, 128, 0.4);
-}
-
-
-.body {
-    flex: 3;
-}
