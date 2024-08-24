@@ -375,6 +375,7 @@
                     if (!result||result.length == 0) {
                         return false
                     }
+                    result = result.filter(e=>e.stamp)
                     const c1 = result.flatMap(e=>[
                         [
                             e.gateway,[e.stamp*1000,e.ping_gateway]
