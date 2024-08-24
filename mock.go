@@ -329,8 +329,8 @@ func randStats() Stats {
 		Server:  "圣彼得堡",
 	}
 
-	s.PingGateway = time.Millisecond*60 + time.Duration(rand.Intn(60))*time.Millisecond
-	s.PingForward = s.PingForward + 90*time.Millisecond
+	s.PingGateway = 60 + time.Duration(rand.Intn(60))
+	s.PingForward = s.PingGateway + 90
 
 	s.Uplink = Loss{
 		Gateway: f(1.5 + rand.Float64()*3),

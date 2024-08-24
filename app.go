@@ -86,8 +86,7 @@ type GameInfo struct {
 	CacheFixRoute   bool   `json:"cache_fix_route"`
 	LastActive      int64  `json:"last_active"` // utc 时间戳
 	Duration        int64  `json:"duration"`
-	//流量
-	Flow int64 `json:"flow"`
+	Flow            int64  `json:"flow"` // 加速流量
 }
 
 type App struct {
