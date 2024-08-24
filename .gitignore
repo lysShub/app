@@ -21,3 +21,4 @@ go.sum
 
 # System enviroment variables
 env
+.DS_Store

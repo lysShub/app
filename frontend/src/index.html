@@ -236,11 +236,11 @@
                 renderer: 'canvas',
                 useDirtyRect: false
             });
-            let data1 = []
-            let data2 = []
+            // let data1 = []
+            // let data2 = []
             const option = {
                 legend: {
-                    data: ['阶段一', '整体'],
+                    // data: ['阶段一', '整体'],
                     textStyle: {
                         color: '#fff'
                     }
@@ -256,62 +256,60 @@
                     type: 'time',
                     show: false
                 },
-                yAxis: [
-                    {
-                        type: 'value',
-                        name: '阶段一',
-                        min: 0,
-                        max: 300,
-                        position: 'left',
-                        axisLabel: {
-                            formatter: '{value}'
-                        }
-                    },
-                    {
-                        type: 'value',
-                        name: '整体',
-                        min: 0,
-                        max: 300,
-                        position: 'right',
-                        axisLabel: {
-                            formatter: '{value} '
-                        }
-                    }
-                ],
-                series: [
-                    {
-                        name: '阶段一',
-                        type: 'line',
-                        smooth: true,
-                        yAxisIndex: 0,
-                        data: data1
-                    },
-                    {
-                        name: '整体',
-                        type: 'line',
-                        smooth: true,
-                        yAxisIndex: 1,
-                        data: data2
-                    }
-                ]
+                // yAxis: [
+                //     {
+                //         type: 'value',
+                //         name: '阶段一',
+                //         min: 0,
+                //         max: 300,
+                //         position: 'left',
+                //         axisLabel: {
+                //             formatter: '{value}'
+                //         }
+                //     },
+                //     {
+                //         type: 'value',
+                //         name: '整体',
+                //         min: 0,
+                //         max: 300,
+                //         position: 'right',
+                //         axisLabel: {
+                //             formatter: '{value} '
+                //         }
+                //     }
+                // ],
+                // series: [
+                //     {
+                //         name: '阶段一',
+                //         type: 'line',
+                //         smooth: true,
+                //         yAxisIndex: 0,
+                //         data: data1
+                //     },
+                //     {
+                //         name: '整体',
+                //         type: 'line',
+                //         smooth: true,
+                //         yAxisIndex: 1,
+                //         data: data2
+                //     }
+                // ]
             };
             if (option && typeof option === 'object') {
                 container1.setOption(option);
             }
 
-
-
             const container2 = echarts.init(document.getElementById('container2'), null, {
                 renderer: 'canvas',
                 useDirtyRect: false
             });
-            let data3 = []
-            let data4 = []
-            let data5 = []
-            let data6 = []
+            // let data3 = []
+            // let data4 = []
+            // let data5 = []
+            // let data6 = []
             const option2 = {
                 legend: {
-                    data: ['第一阶段上行丢包', '第一阶段下行丢包', '第二阶段上行丢包', '第二阶段下行丢包'],
+                    // data: ['第一阶段上行丢包', '第一阶段下行丢包', '第二阶段上行丢包', '第二阶段下行丢包'],
                     textStyle: {
                         color: '#fff'
                     }
@@ -327,104 +325,266 @@
                     type: 'time',
                     show: false
                 },
-                yAxis: {
-                    type: 'value',
-                    min: 0,
-                    max: 100,
-                    position: 'left',
-                    axisLabel: {
-                        formatter: '{value}'
-                    }
-                },
-                series: [
-                    {
-                        name: '第一阶段上行丢包',
-                        type: 'line',
-                        smooth: true,
-                        yAxisIndex: 0,
-                        data: data3
-                    },
-                    {
-                        name: '第一阶段下行丢包',
-                        type: 'line',
-                        smooth: true,
-                        yAxisIndex: 0,
-                        data: data4
-                    },
-                    {
-                        name: '第二阶段上行丢包',
-                        type: 'line',
-                        smooth: true,
-                        yAxisIndex: 0,
-                        data: data5
-                    },
-                    {
-                        name: '第二阶段下行丢包',
-                        type: 'line',
-                        smooth: true,
-                        yAxisIndex: 0,
-                        data: data6
-                    },
-                ]
+                // yAxis: {
+                //     type: 'value',
+                //     min: 0,
+                //     max: 100,
+                //     position: 'left',
+                //     axisLabel: {
+                //         formatter: '{value}'
+                //     }
+                // },
+                // series: [
+                //     {
+                //         name: '第一阶段上行丢包',
+                //         type: 'line',
+                //         smooth: true,
+                //         yAxisIndex: 0,
+                //         data: data3
+                //     },
+                //     {
+                //         name: '第一阶段下行丢包',
+                //         type: 'line',
+                //         smooth: true,
+                //         yAxisIndex: 0,
+                //         data: data4
+                //     },
+                //     {
+                //         name: '第二阶段上行丢包',
+                //         type: 'line',
+                //         smooth: true,
+                //         yAxisIndex: 0,
+                //         data: data5
+                //     },
+                //     {
+                //         name: '第二阶段下行丢包',
+                //         type: 'line',
+                //         smooth: true,
+                //         yAxisIndex: 0,
+                //         data: data6
+                //     },
+                // ]
             };
             if (option2 && typeof option2 === 'object') {
                 container2.setOption(option2);
             }
-
-
-
-            intervalList.push(setInterval(() => {
-                GetStats().then(res => {
-                    let now = new Date().getTime();
-                    data1.push([now, res.ping1])
-                    data2.push([now, res.ping2])
-                    data3.push([now, res.loss_uplink1])
-                    data4.push([now, res.loss_downlink1])
-                    data5.push([now, res.loss_uplink2])
-                    data6.push([now, res.loss_downlink2])
-                    if (data1.length > 100) {
-                        data1.shift()
-                        data2.shift()
-                        data3.shift()
-                        data4.shift()
-                        data5.shift()
-                        data6.shift()
+            intervalList.push(setInterval(()=>{
+                GetStats().then(res=>{
+                    console.log('get stats',res)
+                    let result = res.list;
+                    if (!result||result.length == 0) {
+                        return false
                     }
-                    container2.setOption({
-                        series: [
-                            {
-                                name: '第一阶段上行丢包',
-                                data: data3
-                            },
-                            {
-                                name: '第一阶段下行丢包',
-                                data: data4
-                            },
-                            {
-                                name: '第二阶段上行丢包',
-                                data: data5
-                            },
-                            {
-                                name: '第二阶段下行丢包',
-                                data: data6
-                            }
+                    const c1 = result.flatMap(e=>[
+                        [
+                            e.gateway,[e.stamp*1000,e.ping_gateway]
+                        ],
+                        [
+                            e['forward'],[e.stamp*1000,e.ping_forward]
                         ]
-                    })
-
-                    container1.setOption({
-                        series: [
-                            {
-                                name: '阶段一',
-                                data: data1
+                    ]).reduce((acc,item)=>{
+                        acc[item[0]] = acc[item[0]] || []
+                        acc[item[0]].push(item[1])
+                        return acc;
+                    },{})
+                    const c2 = result.flatMap(e=>[
+                        [
+                            e.gateway+'-上行丢包',[e.stamp*1000,e.uplink.gateway]
+                        ],
+                        [
+                            e.gateway+'-下行丢包',[e.stamp*1000,e.donwlink.gateway]
+                        ],
+                        [
+                            e['forward']+'-上行丢包',[e.stamp*1000,e.uplink.forward]
+                        ],
+                        [
+                            e['forward']+'-下行丢包',[e.stamp*1000,e.donwlink.forward]
+                        ],
+                        [
+                            e.gateway+'-合计丢包',[e.stamp*1000,e.total.gateway]
+                        ],
+                        [
+                            e['forward']+'-合计丢包',[e.stamp*1000,e.total.forward]
+                        ],
+                    ]).reduce((acc,item)=>{
+                        acc[item[0]] = acc[item[0]] || []
+                        acc[item[0]].push(item[1])
+                        return acc;
+                    },{})
+                    container1.setOption(
+                        {
+                            tooltip: {
+                                trigger: 'axis',
+                                axisPointer: {
+                                    type: 'shadow'
+                                },
+                                backgroundColor: '#fff', // 悬浮框背景色
+                                borderColor: '#000', // 悬浮框边框颜色
+                                borderWidth: 1, // 悬浮框边框宽度
+                                textStyle: { // 悬浮框文字样式
+                                    color: '#000',
+                                    fontSize: 12
+                                }
                             },
-                            {
-                                name: '整体',
-                                data: data2
-                            }
-                        ]
-                    });
+                            legend: {
+                                // data: ['阶段一', '整体'],
+                                textStyle: {
+                                    color: '#fff'
+                                },
+                                bottom:10
+                            },
+                            title: {
+                                text: '延时(ms)',
+                                textAlign: 'auto',
+                                textStyle: {
+                                    color: '#fff'
+                                }
+                            },
+                            xAxis: {
+                                type: 'time',
+                                show: false
+                            },
+                            yAxis:
+                                Object.keys(c1).map(k=>{
+                                    return {
+                                        type: 'value',
+                                        // name: k,
+                                        position: 'left',
+                                        axisLabel: {
+                                            formatter: '{value}'
+                                        }
+                                    }
+                                }),
+                            series:
+                                Object.keys(c1).map(k=>{
+                                    return {
+                                        type: 'line',
+                                        smooth: true,
+                                        yAxisIndex: 0,
+                                        name:k,
+                                        data:c1[k],
+                                        symbol: 'none',
+                                        areaStyle: {
+                                            normal: {}
+                                        },
+                                    }
+                                })
+                        })
+                    container2.setOption(
+                        {
+                            tooltip: {
+                                trigger: 'axis',
+                                axisPointer: {
+                                    type: 'shadow'
+                                },
+                                backgroundColor: '#fff', // 悬浮框背景色
+                                borderColor: '#000', // 悬浮框边框颜色
+                                borderWidth: 1, // 悬浮框边框宽度
+                                textStyle: { // 悬浮框文字样式
+                                    color: '#000',
+                                    fontSize: 12
+                                }
+                            },
+                            legend: {
+                                // data: ['阶段一', '整体'],
+                                textStyle: {
+                                    color: '#fff'
+                                },
+                                bottom:10
+                            },
+                            title: {
+                                text: '丢包(%s)',
+                                textAlign: 'auto',
+                                textStyle: {
+                                    color: '#fff'
+                                }
+                            },
+                            xAxis: {
+                                type: 'time',
+                                show: false
+                            },
+                            yAxis:
+                                Object.keys(c2).map(k=>{
+                                    return {
+                                        type: 'value',
+                                        // name: k,
+                                        position: 'left',
+                                        axisLabel: {
+                                            formatter: '{value}'
+                                        }
+                                    }
+                                }),
+                            series:
+                                Object.keys(c2).map(k=>{
+                                    return {
+                                        type: 'line',
+                                        smooth: true,
+                                        yAxisIndex: 0,
+                                        name:k,
+                                        data:c2[k],
+                                        symbol: 'none',
+                                        areaStyle: {
+                                            normal: {}
+                                        },
+                                    }
+                                })
+                        })
                 })
-            }, 500))
+            },3000))
+
+            // intervalList.push(setInterval(() => {
+            //     GetStats().then(res => {
+            //         console.log('get stats',res)
+            //         let now = new Date().getTime();
+            //         data1.push([now, res.ping1])
+            //         data2.push([now, res.ping2])
+            //         data3.push([now, res.loss_uplink1])
+            //         data4.push([now, res.loss_downlink1])
+            //         data5.push([now, res.loss_uplink2])
+            //         data6.push([now, res.loss_downlink2])
+            //         if (data1.length > 100) {
+            //             data1.shift()
+            //             data2.shift()
+            //             data3.shift()
+            //             data4.shift()
+            //             data5.shift()
+            //             data6.shift()
+            //         }
+            //         container2.setOption({
+            //             series: [
+            //                 {
+            //                     name: '第一阶段上行丢包',
+            //                     data: data3
+            //                 },
+            //                 {
+            //                     name: '第一阶段下行丢包',
+            //                     data: data4
+            //                 },
+            //                 {
+            //                     name: '第二阶段上行丢包',
+            //                     data: data5
+            //                 },
+            //                 {
+            //                     name: '第二阶段下行丢包',
+            //                     data: data6
+            //                 }
+            //             ]
+            //         })
+            //
+            //         container1.setOption({
+            //             series: [
+            //                 {
+            //                     name: '阶段一',
+            //                     data: data1
+            //                 },
+            //                 {
+            //                     name: '整体',
+            //                     data: data2
+            //                 }
+            //             ]
+            //         });
+            //     })
+            // }, 500))
 
         }
 
@@ -479,7 +639,7 @@
             </div>
         </div>
 
-        <div class=" ml-10" id="detailTabSection">
+        <div class=" ml-10 overflow-y-auto	w-full" id="detailTabSection">
             <!--        view-->
             <div id="ing" class="hidden">
                 <div class="flex gap-3">
@@ -495,8 +655,8 @@
                 </div>
                 <div>
                     <!--                echart-->
-                    <div id="container1" class="h-[300px] w-[500px]"></div>
-                    <div id="container2" class="h-[300px] w-[500px]"></div>
+                    <div id="container1" class="h-[300px] w-[1000px]"></div>
+                    <div id="container2" class="h-[300px] w-[1000px]"></div>
                 </div>
                 <div>
                 </div>
