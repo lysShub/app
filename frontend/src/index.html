@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="" lang=>
+<html class="" lang="zh" class="bg-slate-500">
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -182,7 +182,6 @@
             let account = document.getElementById('account').value;
             let password = document.getElementById('password').value;
             RegisterOrLogin(account, password).then(res => {
-                // console.log('login',res)
                 if (res.code == 0) {
                     tryGetUser()
                     toggleLoginSection()
@@ -248,11 +247,8 @@
                 renderer: 'canvas',
                 useDirtyRect: false
             });
-            // let data1 = []
-            // let data2 = []
             const option = {
                 legend: {
-                    // data: ['阶段一', '整体'],
                     textStyle: {
                         color: '#fff'
                     }
@@ -268,44 +264,6 @@
                     type: 'time',
                     show: false
                 },
-                // yAxis: [
-                //     {
-                //         type: 'value',
-                //         name: '阶段一',
-                //         min: 0,
-                //         max: 300,
-                //         position: 'left',
-                //         axisLabel: {
-                //             formatter: '{value}'
-                //         }
-                //     },
-                //     {
-                //         type: 'value',
-                //         name: '整体',
-                //         min: 0,
-                //         max: 300,
-                //         position: 'right',
-                //         axisLabel: {
-                //             formatter: '{value} '
-                //         }
-                //     }
-                // ],
-                // series: [
-                //     {
-                //         name: '阶段一',
-                //         type: 'line',
-                //         smooth: true,
-                //         yAxisIndex: 0,
-                //         data: data1
-                //     },
-                //     {
-                //         name: '整体',
-                //         type: 'line',
-                //         smooth: true,
-                //         yAxisIndex: 1,
-                //         data: data2
-                //     }
-                // ]
             };
             if (option && typeof option === 'object') {
                 container1.setOption(option);
@@ -315,13 +273,8 @@
                 renderer: 'canvas',
                 useDirtyRect: false
             });
-            // let data3 = []
-            // let data4 = []
-            // let data5 = []
-            // let data6 = []
             const option2 = {
                 legend: {
-                    // data: ['第一阶段上行丢包', '第一阶段下行丢包', '第二阶段上行丢包', '第二阶段下行丢包'],
                     textStyle: {
                         color: '#fff'
                     }
@@ -337,45 +290,6 @@
                     type: 'time',
                     show: false
                 },
-                // yAxis: {
-                //     type: 'value',
-                //     min: 0,
-                //     max: 100,
-                //     position: 'left',
-                //     axisLabel: {
-                //         formatter: '{value}'
-                //     }
-                // },
-                // series: [
-                //     {
-                //         name: '第一阶段上行丢包',
-                //         type: 'line',
-                //         smooth: true,
-                //         yAxisIndex: 0,
-                //         data: data3
-                //     },
-                //     {
-                //         name: '第一阶段下行丢包',
-                //         type: 'line',
-                //         smooth: true,
-                //         yAxisIndex: 0,
-                //         data: data4
-                //     },
-                //     {
-                //         name: '第二阶段上行丢包',
-                //         type: 'line',
-                //         smooth: true,
-                //         yAxisIndex: 0,
-                //         data: data5
-                //     },
-                //     {
-                //         name: '第二阶段下行丢包',
-                //         type: 'line',
-                //         smooth: true,
-                //         yAxisIndex: 0,
-                //         data: data6
-                //     },
-                // ]
             };
             if (option2 && typeof option2 === 'object') {
                 container2.setOption(option2);
@@ -554,61 +468,6 @@
                         })
                 })
             }, 3000))
-
-            // intervalList.push(setInterval(() => {
-            //     GetStats().then(res => {
-            //         console.log('get stats',res)
-            //         let now = new Date().getTime();
-            //         data1.push([now, res.ping1])
-            //         data2.push([now, res.ping2])
-            //         data3.push([now, res.loss_uplink1])
-            //         data4.push([now, res.loss_downlink1])
-            //         data5.push([now, res.loss_uplink2])
-            //         data6.push([now, res.loss_downlink2])
-            //         if (data1.length > 100) {
-            //             data1.shift()
-            //             data2.shift()
-            //             data3.shift()
-            //             data4.shift()
-            //             data5.shift()
-            //             data6.shift()
-            //         }
-            //         container2.setOption({
-            //             series: [
-            //                 {
-            //                     name: '第一阶段上行丢包',
-            //                     data: data3
-            //                 },
-            //                 {
-            //                     name: '第一阶段下行丢包',
-            //                     data: data4
-            //                 },
-            //                 {
-            //                     name: '第二阶段上行丢包',
-            //                     data: data5
-            //                 },
-            //                 {
-            //                     name: '第二阶段下行丢包',
-            //                     data: data6
-            //                 }
-            //             ]
-            //         })
-            //
-            //         container1.setOption({
-            //             series: [
-            //                 {
-            //                     name: '阶段一',
-            //                     data: data1
-            //                 },
-            //                 {
-            //                     name: '整体',
-            //                     data: data2
-            //                 }
-            //             ]
-            //         });
-            //     })
-            // }, 500))
-
         }
 
         function recharge() {

@@ -2,11 +2,11 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build",
+            "label": "debug",
             "dependsOrder": "sequence",
             "dependsOn": [
                 "tailwind-build",
-                "wails-build"
+                "wails-debug"
             ]
         },
         {
@@ -23,7 +23,7 @@
             ]
         },
         {
-            "label": "wails-build",
+            "label": "wails-debug",
             "type": "shell",
             "options": {
                 "cwd": "${workspaceFolder}",

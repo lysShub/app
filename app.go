@@ -7,14 +7,10 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
-type ApiResponse struct {
-	Code MsgCode `json:"code"`
-	Msg  string  `json:"msg"`
-	Data any     `json:"data"`
-}
 type Message struct {
 	Code MsgCode `json:"code"`
 	Msg  string  `json:"msg"`
+	Data any     `json:"data"`
 }
 
 //go:generate stringer -linecomment -output app_gen.go -type=MsgCode
@@ -112,9 +108,9 @@ type UserInfo struct {
 
 // GetUser 获取用户信息, 应用渲染完成即调用此函数, 如果msg.Code==NotLogin, 则弹出注册登录页面
 
-func (a *App) GetUser() ApiResponse {
+func (a *App) GetUser() Message {
 	user, message := a.Mock.GetUser()
-	return ApiResponse{
+	return Message{
 		Code: message.Code,
 		Msg:  message.Msg,
 		Data: user,
@@ -129,11 +125,11 @@ func (a *App) RegisterOrLogin(user, pwd string) (msg Message) {
 // todo: 暂时不考虑
 // Recharge 充值，返回一个字符二维码、和一个全局事件。参考 https://wails.io/zh-Hans/docs/reference/runtime/events
 // 回调返回结果是Message类型
-func (a *App) Recharge(months int, eventName string) ApiResponse {
+func (a *App) Recharge(months int, eventName string) Message {
 	path, message := a.Mock.Recharge(months, func(m Message) {
 		runtime.EventsEmit(a.ctx, eventName, m)
 	})
-	return ApiResponse{
+	return Message{
 		Code: message.Code,
 		Msg:  message.Msg,
 		Data: path,
@@ -142,9 +138,9 @@ func (a *App) Recharge(months int, eventName string) ApiResponse {
 
 // ListGames 获取已添加的游戏列表, selectedIdx 表示默认应该选中的游戏
 
-func (a *App) ListGames() ApiResponse {
+func (a *App) ListGames() Message {
 	list, idx, msg := a.Mock.ListGames()
-	return ApiResponse{
+	return Message{
 		Code: msg.Code,
 		Msg:  msg.Msg,
 		Data: struct {
@@ -158,9 +154,9 @@ func (a *App) ListGames() ApiResponse {
 }
 
 // SelectGame 选中某个游戏
-func (a *App) SelectGame(gameId GameId) ApiResponse {
+func (a *App) SelectGame(gameId GameId) Message {
 	game, message := a.Mock.SelectGame(gameId)
-	return ApiResponse{
+	return Message{
 		Code: message.Code,
 		Msg:  message.Msg,
 		Data: game,
@@ -168,9 +164,9 @@ func (a *App) SelectGame(gameId GameId) ApiResponse {
 }
 
 // GetSelectedGame 获取当前选中的游戏
-func (a *App) GetSelectedGame() ApiResponse {
+func (a *App) GetSelectedGame() Message {
 	game, message := a.Mock.GetSelectedGame()
-	return ApiResponse{
+	return Message{
 		Code: message.Code,
 		Msg:  message.Msg,
 		Data: game,
@@ -178,9 +174,9 @@ func (a *App) GetSelectedGame() ApiResponse {
 }
 
 // SearchGame 根据关键字搜索游戏
-func (a *App) SearchGame(keyword string) ApiResponse {
+func (a *App) SearchGame(keyword string) Message {
 	game, message := a.Mock.SearchGame(keyword)
-	return ApiResponse{
+	return Message{
 		Code: message.Code,
 		Msg:  message.Msg,
 		Data: game,
