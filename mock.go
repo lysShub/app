@@ -38,6 +38,13 @@ func (i *Mock) init() *Mock {
 	fmt.Println("store path", i.storePath())
 
 	if os.IsNotExist(err) {
+		i.User = UserInfo{
+			Name:     "test",
+			Password: "1234567",
+			Phone:    "13448612544",
+			Expire:   time.Now().AddDate(1, 0, 0).Unix(),
+		}
+
 		i.Games = map[GameId]GameInfo{
 			1: {
 				GameId:      1,
@@ -323,27 +330,19 @@ func (a *Mock) Stats() (s StatsList) {
 
 func randStats() Stats {
 	var s = Stats{
-		Stamp:   int(time.Now().Unix()),
-		Gateway: "北京",
-		Forward: "莫斯科",
-		Server:  "圣彼得堡",
+		MilliStamp: int(time.Now().Unix()),
+		GatewayLoc: "北京",
+		ForwardLoc: "莫斯科",
+		ServerLoc:  "圣彼得堡",
 	}
 
-	s.PingGateway = 60 + time.Duration(rand.Intn(60))
-	s.PingForward = s.PingGateway + 90
+	s.RttGateway = 60 + time.Duration(rand.Intn(60))
+	s.RttForward = s.RttGateway + 90
 
-	s.Uplink = Loss{
-		Gateway: f(1.5 + rand.Float64()*3),
-		Forward: f(rand.Float64()),
-	}
-	s.Donwlink = Loss{
-		Gateway: f(0.5 + rand.Float64()),
-		Forward: f(rand.Float64()),
-	}
-	s.Total = Loss{
-		Gateway: f(s.Uplink.Gateway + s.Donwlink.Gateway),
-		Forward: f(s.Uplink.Forward + s.Donwlink.Forward),
-	}
+	s.LossClientUplink = f(1.5 + rand.Float64()*3)
+	s.LossClientDownlink = f(rand.Float64())
+	s.LossGatewayUplink = f(rand.Float64())
+	s.LossGatewayDownlink = f(rand.Float64())
 	return s
 }
 

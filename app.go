@@ -218,22 +218,19 @@ type StatsList struct {
 }
 
 type Stats struct {
-	Stamp   int    `json:"stamp"`   // 本数据点对应的时间戳
-	Gateway string `json:"gateway"` // gateway所在城市名
-	Forward string `json:"forward"` // forward所在城市名
-	Server  string `json:"server"`  // server所在城市名
+	MilliStamp int `json:"stamp"` // 本数据点对应的时间戳
 
-	PingGateway time.Duration `json:"ping_gateway"` // 到gateway的延时
-	PingForward time.Duration `json:"ping_forward"` // 到forward的延时
+	GatewayLoc string `json:"gateway_loc"` // gateway所在城市名
+	ForwardLoc string `json:"forward_loc"` // forward所在城市名
+	ServerLoc  string `json:"server_loc"`  // server所在城市名
 
-	Uplink   Loss `json:"uplink"`   // 上行丢包
-	Donwlink Loss `json:"donwlink"` // 下行丢包
-	Total    Loss `json:"total"`    // 合计丢包
-}
+	RttGateway time.Duration `json:"rtt_gateway"` // 到gateway的延时
+	RttForward time.Duration `json:"rtt_forward"` // 到forward的延时
 
-type Loss struct {
-	Gateway float64 `json:"gateway"` // client-gateway 的丢包
-	Forward float64 `json:"forward"` // gateway-forward的丢包
+	LossClientUplink    float64 `json:"loss_client_uplink"`
+	LossClientDownlink  float64 `json:"loss_client_downlink"`
+	LossGatewayUplink   float64 `json:"loss_gateway_uplink"`
+	LossGatewayDownlink float64 `json:"loss_gateway_downlink"`
 }
 
 // Stats 获取统计信息, 阻塞函数, 如果距上次调用时间短于3s, 会主动阻塞直到恰好相距3s

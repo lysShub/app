@@ -1,614 +1,442 @@
 <!DOCTYPE html>
-<html class="" lang="zh" class="bg-slate-500">
+<html class="" lang="zh">
 
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge, Chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgo=">
-    <!-- Main Source Files -->
-    <link rel="stylesheet" href="main.css" />
-    <link rel="stylesheet" href="./tailwind.css">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge, Chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgo=">
+  <!-- Main Source Files -->
+  <link rel="stylesheet" href="main.css" />
+  <!-- <link rel="stylesheet" href="./tailwind.css"> -->
 
-    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
-    <script src="./main.js"></script>
-    <script src="./wails/runtime.js"></script>
-    <script src="./echarts.min.js"></script>
-    <script>
-        let lossStatsSwitch = 3;
-
-        function lossStaticSelect(e) {
-            let value = e.value;
-            lossStatsSwitch = value
-        }
+  <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+  <script src="./main.js"></script>
+  <script src="./wails/runtime.js"></script>
+  <script src="./echarts.min.js"></script>
+  <script>
 
 
-        let gameId = -1;
-        const intervalList = []
-
-        function clearAllInterval() {
-            intervalList.forEach(interval => {
-                clearInterval(interval)
-            })
-        }
-
-        function addGame(gameId) {
-            AddGame(gameId).then(res => {
-                console.log('add game', res)
-                if (res.code == 0) {
-                    getGameList()
-                    alert('添加成功')
-                } else {
-                    alert(res.msg)
-                }
-            })
-        }
-
-        function toggleTabSwitch(name) {
-            let tabs = ['ing', 'begin', 'recharge']
-            if (name == 'ing') {
-                getStats()
-            } else {
-                clearAllInterval()
-            }
-            tabs.forEach(tab => {
-                if (tab == name) {
-                    document.getElementById(tab).classList.remove('hidden')
-                } else {
-                    document.getElementById(tab).classList.add('hidden')
-                }
-            })
-        }
-
-        function searchGameList() {
-            let keyword = document.getElementById('search').value
-            let searchResult = document.getElementById('searchResult')
-            searchResult.innerHTML = '正在搜索...'
-            searchResult.style.height = 'auto'
-            SearchGame(keyword).then(res => {
-                console.log(res)
-                if (res.code == 0 && res.data) {
-                    searchResult.innerHTML = ''
-                    res.data.forEach(game => {
-                        let div = document.createElement('div')
-                        div.setAttribute('gameId', game.game_id)
-                        div.classList.add('flex', 'items-center', 'gap-3', 'hover:ring', 'px-5', 'w-full', 'justify-between')
-                        div.innerHTML = `
-                            <img src="${game.icon_path}" class="object-cover size-10 "/>
-                            <span>${game.name}</span>
-                            <button class="border rounded-xl bg-green-400 p-3 hover:bg-green-400/90" onclick="addGame(${game.game_id})">
-                                添加游戏
-                            </button>
-                        `
-                        searchResult.appendChild(div)
-                    })
-                }
-            })
-        }
-
-        function toggleSearchSection() {
-            document.getElementById('searchSection').classList.toggle('hidden')
-        }
-
-        function transHumanTime(time) {
-            let i = 0;
-            let unit = ["秒", "分钟", "小时", "天", "月", "年"];
-            while (time > 60) {
-                time /= 60;
-                i++;
-            }
-            return `${time.toFixed(2)}${unit[i]}`;
-        }
-
-        function transHumanBitSize(size) {
-            let i = 0;
-            let unit = ["b", "B", "KB", "MB", "GB", "TB"];
-            if (size > 8) {
-                size /= 8;
-                i++;
-            }
-            while (size > 1024) {
-                size /= 1024;
-                i++;
-            }
-            return `${size.toFixed(2)}${unit[i]}`;
-        }
-
-        function formatDateTime(time, format) {
-            let date = new Date(time)
-            let year = date.getFullYear()
-            let month = date.getMonth() + 1
-            let day = date.getDate()
-            let hour = date.getHours()
-            let minute = date.getMinutes()
-            let second = date.getSeconds()
-            return format.replace('yyyy', year).replace('MM', month).replace('dd', day).replace('HH', hour).replace('mm', minute).replace('ss', second)
-        }
-
-
-        function getGameList() {
-            ListGames().then(res => {
-                console.log('gamlist', res)
-                if (res.code != 0) {
-                    return false
-                }
-                let result = res.data.list;
-                if (!result) {
-                    return false
-                }
-                let gameList = document.getElementById('gameList');
-                gameList.innerHTML = ''
-                result.forEach(game => {
-                    let div = document.createElement('div')
-                    div.classList.add('flex', 'items-center', 'gap-3', 'hover:ring', 'px-5', 'w-full', 'justify-center')
-                    div.setAttribute('gameId', game.game_id)
-                    div.setAttribute('onclick', 'selectGame(this)')
-                    div.innerHTML = `
-                        <img src="${game.icon_path}" class="object-cover size-10 "/>
-                        <span>${game.name}</span>
-                    `
-                    gameList.appendChild(div)
-                })
-            })
-        }
-
-        async function tryGetUser() {
-            return await GetUser().then(res => {
-                console.log('user', res)
-                if (res.code == 2) {
-                    toggleLoginSection()
-                    return false;
-                } else {
-                    document.getElementById('userName').innerText = res.data.name
-                    document.getElementById('expireDate').innerText = formatDateTime(new Date(res.data.expire * 1000), 'yyyy年MM月dd日')
-                }
-                return true;
-            })
-        }
-
-        window.onload = function () {
-            tryGetUser().then(res => {
-                if (res) {
-                    getGameList()
-                }
-            })
-        }
-
-        function toggleLoginSection() {
-            document.getElementById('loginSection').classList.toggle('hidden')
-        }
-
-        function Login() {
-            let account = document.getElementById('account').value;
-            let password = document.getElementById('password').value;
-            RegisterOrLogin(account, password).then(res => {
-                if (res.code == 0) {
-                    tryGetUser()
-                    toggleLoginSection()
-                } else {
-                    alert('登录失败')
-                }
-            })
-        }
-
-        function selectGame(e) {
-            document.getElementById('gameList').querySelectorAll('div').forEach(item => {
-                item.classList.remove('bg-green-400')
-            })
-            e.classList.add('bg-green-400')
-            toggleTabSwitch('begin')
-            gameId = parseInt(e.getAttribute('gameId'))
-
-            SelectGame(gameId).then(res => {
-                console.log('select game', res)
-                if (res.code == 0) {
-                    let bgE = document.getElementsByClassName('gameBg');
-                    for (let i = 0; i < bgE.length; i++) {
-                        bgE[i].src = res.data.bgimg_path
-                    }
-                    document.getElementById('lastActive').innerText = formatDateTime(new Date(res.data.last_active * 1000), 'yyyy年MM月dd日 HH:mm:ss')
-                    let durationE = document.getElementsByClassName('duration');
-                    for (let i = 0; i < durationE.length; i++) {
-                        durationE[i].innerText = transHumanTime(res.data.duration)
-                    }
-                    document.getElementById('flow').innerText = transHumanBitSize(res.data.flow)
-                    let serverList = document.getElementById('serverList')
-                    serverList.innerHTML = ''
-                    res.data.game_servers.forEach(server => {
-                        let option = document.createElement('option')
-                        option.value = server
-                        option.innerText = server
-                        serverList.appendChild(option)
-                    })
-                }
-            })
-
-        }
-
-        function begin(e) {
-            Accelerate(gameId).then(res => {
-                console.log('being', res)
-                // toggleTabSwitch('recharge')
-                if (res.code == 4) {
-                    alert('余额不足')
-                    toggleTabSwitch('recharge')
-                } else if (res.code == 6) {
-                    // alert(res.msg)
-                    toggleTabSwitch('ing')
-                } else if (res.code == 0) {
-                    toggleTabSwitch('ing')
-                }
-            })
-
-        }
-
-        function getStats() {
-            var container1 = echarts.init(document.getElementById('container1'), null, {
-                renderer: 'canvas',
-                useDirtyRect: false
-            });
-            const option = {
-                legend: {
-                    textStyle: {
-                        color: '#fff'
-                    }
-                },
-                title: {
-                    text: '延时(ms)',
-                    textAlign: 'auto',
-                    textStyle: {
-                        color: '#fff'
-                    }
-                },
-                xAxis: {
-                    type: 'time',
-                    show: false
-                },
-            };
-            if (option && typeof option === 'object') {
-                container1.setOption(option);
-            }
-
-            const container2 = echarts.init(document.getElementById('container2'), null, {
-                renderer: 'canvas',
-                useDirtyRect: false
-            });
-            const option2 = {
-                legend: {
-                    textStyle: {
-                        color: '#fff'
-                    }
-                },
-                title: {
-                    text: '丢包(%s)',
-                    textAlign: 'auto',
-                    textStyle: {
-                        color: '#fff'
-                    }
-                },
-                xAxis: {
-                    type: 'time',
-                    show: false
-                },
-            };
-            if (option2 && typeof option2 === 'object') {
-                container2.setOption(option2);
-            }
-            intervalList.push(setInterval(() => {
-                GetStats().then(res => {
-                    console.log('get stats', res)
-                    let result = res.list;
-                    if (!result || result.length == 0) {
-                        return false
-                    }
-                    result = result.filter(e => e.stamp)
-                    const c1 = result.flatMap(e => [
-                        [
-                            e.gateway, [e.stamp * 1000, e.ping_gateway]
-                        ],
-                        [
-                            e['forward'], [e.stamp * 1000, e.ping_forward]
-                        ]
-                    ]).reduce((acc, item) => {
-                        acc[item[0]] = acc[item[0]] || []
-                        acc[item[0]].push(item[1])
-                        return acc;
-                    }, {})
-                    const c2 = result.flatMap(e => {
-                        if (lossStatsSwitch == 1) {
-                            return [
-                                [
-                                    e.gateway, [e.stamp * 1000, e.uplink.gateway]
-                                ],
-                                [
-                                    e['forward'], [e.stamp * 1000, e.uplink.forward]
-                                ],
-                            ]
-                        } else if (lossStatsSwitch == 2) {
-                            return [
-                                [
-                                    e.gateway, [e.stamp * 1000, e.donwlink.gateway]
-                                ],
-                                [
-                                    e['forward'], [e.stamp * 1000, e.donwlink.forward]
-                                ],
-                            ]
-                        } else {
-                            return [
-                                [
-                                    e.gateway, [e.stamp * 1000, e.total.gateway]
-                                ],
-                                [
-                                    e['forward'], [e.stamp * 1000, e.total.forward]
-                                ],
-                            ]
-                        }
-                    }).reduce((acc, item) => {
-                        acc[item[0]] = acc[item[0]] || []
-                        acc[item[0]].push(item[1])
-                        return acc;
-                    }, {})
-                    container1.setOption(
-                        {
-                            tooltip: {
-                                trigger: 'axis',
-                                axisPointer: {
-                                    type: 'shadow'
-                                },
-                                backgroundColor: '#fff', // 悬浮框背景色
-                                borderColor: '#000', // 悬浮框边框颜色
-                                borderWidth: 1, // 悬浮框边框宽度
-                                textStyle: { // 悬浮框文字样式
-                                    color: '#000',
-                                    fontSize: 12
-                                }
-                            },
-                            legend: {
-                                // data: ['阶段一', '整体'],
-                                textStyle: {
-                                    color: '#fff'
-                                },
-                                bottom: 10
-                            },
-                            title: {
-                                text: '延时(ms)',
-                                textAlign: 'auto',
-                                textStyle: {
-                                    color: '#fff'
-                                }
-                            },
-                            xAxis: {
-                                type: 'time',
-                                show: false
-                            },
-                            yAxis:
-                                Object.keys(c1).map(k => {
-                                    return {
-                                        type: 'value',
-                                        // name: k,
-                                        position: 'left',
-                                        axisLabel: {
-                                            formatter: '{value}'
-                                        }
-                                    }
-                                }),
-                            series:
-                                Object.keys(c1).map(k => {
-                                    return {
-                                        type: 'line',
-                                        smooth: true,
-                                        yAxisIndex: 0,
-                                        name: k,
-                                        data: c1[k],
-                                        symbol: 'none',
-                                        // areaStyle: {
-                                        //     normal: {}
-                                        // },
-                                    }
-                                })
-                        })
-                    container2.setOption(
-                        {
-                            tooltip: {
-                                trigger: 'axis',
-                                axisPointer: {
-                                    type: 'shadow'
-                                },
-                                backgroundColor: '#fff', // 悬浮框背景色
-                                borderColor: '#000', // 悬浮框边框颜色
-                                borderWidth: 1, // 悬浮框边框宽度
-                                textStyle: { // 悬浮框文字样式
-                                    color: '#000',
-                                    fontSize: 12
-                                }
-                            },
-                            legend: {
-                                // data: ['阶段一', '整体'],
-                                textStyle: {
-                                    color: '#fff'
-                                },
-                                bottom: 10
-                            },
-                            title: {
-                                text: '丢包(%s)',
-                                textAlign: 'auto',
-                                textStyle: {
-                                    color: '#fff'
-                                }
-                            },
-                            xAxis: {
-                                type: 'time',
-                                show: false
-                            },
-                            yAxis:
-                                Object.keys(c2).map(k => {
-                                    return {
-                                        type: 'value',
-                                        // name: k,
-                                        position: 'left',
-                                        axisLabel: {
-                                            formatter: '{value}'
-                                        }
-                                    }
-                                }),
-                            series:
-                                Object.keys(c2).map(k => {
-                                    return {
-                                        type: 'line',
-                                        smooth: true,
-                                        yAxisIndex: 0,
-                                        name: k,
-                                        data: c2[k],
-                                        symbol: 'none',
-                                        // areaStyle: {
-                                        //     normal: {}
-                                        // },
-                                    }
-                                })
-                        })
-                })
-            }, 3000))
-        }
-
-        function recharge() {
-            let month = parseInt(document.getElementById('month').value)
-            if (!month) {
-                alert('请输入充值月份')
-                return
-            }
-            Recharge(month, 'recharge-success').then(res => {
-                console.log('recharge', res)
-                if (res.code == 0) {
-                    document.getElementById('qrCode').src = res.data
-                    window.runtime.EventsOn('recharge-success', () => {
-                        alert('充值成功')
-                        toggleTabSwitch('begin')
-                    })
-                } else {
-                    alert(res.msg)
-                }
-            })
-        }
-
-        function stop(e) {
-            DisableAccelerate().then(res => {
-                console.log('stop', res)
-                if (res.code == 0) {
-                    toggleTabSwitch('begin')
-                }
-            })
-        }
-
-    </script>
+    // function test() {
+    //   var elem = document.getElementsByClassName('search-game-grid-item')[0];
+    //   var newElem = elem.cloneNode(true);
+    //   elem.parentElement.appendChild(newElem);
+    //   console.log(elem.innerHTML);
+    // }
+  </script>
 </head>
 
-<body class=" ">
-    <div class="flex pt-10 h-screen">
-        <div class="h-full w-[300px]   border-white flex flex-col	">
-            <!--            game select-->
-            <div id="gameList" class=" flex flex-col items-center mt-5 gap-3 overflow-y-auto flex-grow">
-            </div>
-            <div class="flex items-center justify-center gap-3 hover:ring px-5 w-full cursor-pointer" onclick="toggleSearchSection()">
-                + 添加游戏
-            </div>
-            <!--        user section-->
-            <div class="flex item-center gap-3 p-5 ">
-                <img src="assets/images/logo-universal.png" class="object-cover size-10 rounded-full  ring" />
-                <div class="flex flex-col items-start">
-                    <p class="line-clamp-1 break-all">昵称：<span id="userName"></span></p>
-                    <p class="line-clamp-1 break-all">到期：<span id="expireDate"></span></p>
-                </div>
-            </div>
+<body class="body">
+  <div class="side-bar">
+
+    <div class="games">
+      <div class="games-list">
+
+        <div class="games-item">
+          <img class="games-item-icon" src="./assets/images/images/pubg-icon.png" />
+          <p class="games-item-name">战争雷霆 (国际服)</p>
+        </div>
+        <div class="games-item">
+          <img class="games-item-icon" src="./assets/images/images/csgo-icon.png" />
+          <p class="games-item-name">反恐精英</p>
+        </div>
+        <div class="games-item">
+          <img class="games-item-icon" src="./assets/images/images/dnf-icon.png" />
+          <p class="games-item-name">地下城与勇士</p>
         </div>
 
-        <div class=" ml-10 overflow-y-auto	w-full" id="detailTabSection">
-            <!--        view-->
-            <div id="ing" class="hidden">
-                <div class="flex gap-3">
-                    <img class=" w-[400px] h-[300px] object-cover rounded-2xl gameBg" />
-                    <button class="border rounded-xl bg-green-400 p-3 hover:bg-green-400/90" onclick="stop(this)">停止加速
-                    </button>
-                </div>
-                <div class="flex gap-3 mt-5">
-                    <div class=" p-3">累计时长：<span class="duration"></span></div>
-                    <div class=" p-3">加速流量：<span id="flow"></span></div>
-                    <div>
-                    </div>
-                </div>
-                <div>
-                    <!--                echart-->
-                    <div id="container1" class="h-[300px] w-[1000px]"></div>
-                    <div>
-                        <select class=" p-3 rounded-xl bg-transparent" id="lossStaticSelect" required onchange="lossStaticSelect(this)">
-                            <option value="1">上行</option>
-                            <option value="2">下行</option>
-                            <option value="3" selected>合计</option>
-                        </select>
-                    </div>
-                    <div id="container2" class="h-[300px] w-[1000px]">
+      </div>
 
-                    </div>
-                </div>
-                <div>
-                </div>
-            </div>
+      <div class="games-add">
+        <div onclick="console.log(123)" class="games-add-item">&nbsp;&nbsp;&nbsp;＋&nbsp;添加游戏 </div>
+      </div>
+    </div>
 
-            <div id="begin" class="hidden">
-                <img class=" w-[400px] h-[300px] object-cover rounded-2xl gameBg" />
-                <div class="flex gap-3 mt-5">
-                    <div class=" p-3">最近加速：<span id="lastActive" class=""></span></div>
-                    <div class=" p-3">累计时长：<span class="duration"></span></div>
-                    <!--        operation-->
-                    <div class="flex flex-col items-start gap-3">
-                        <div class=" flex  gap-3">
-                            <select class=" p-3 rounded-xl bg-transparent" id="serverList" required>
-
-                            </select>
-                        </div>
-                        <div>
-                            <input type="radio" name="gender" checked value="apple" id='1'><label for="1">固定路由</label></br>
-                            <input type="radio" name="gender" checked value="apple" id='2'><label for="2">智能路由</label>
-                        </div>
-                        <button class="border rounded-xl bg-green-400 p-3 hover:bg-green-400/90" onclick="begin(this)">
-                            加速游戏
-                        </button>
-
-                    </div>
-                </div>
-            </div>
-
-            <div id="recharge" class="hidden">
-                <div class="flex  items-center gap-3">
-                    <input type="text" placeholder="充值月份" class="border p-3 rounded-xl text-black" id="month" />
-                    <button class="border rounded-xl bg-green-400 p-3 hover:bg-green-400/90" onclick="recharge()">充值
-                    </button>
-                </div>
-                <img class="size-50 object-cover rounded-2xl mt-5" id="qrCode" />
-            </div>
-
+    <div class="user-info">
+      <img class="user-info-icon" src="./assets/images/logo-universal.png">
+      <div class="user-info-detail">
+        <div class="user-info-nickname">test</div>
+        <div class="user-info-subscribe">
+          <p>到期:&nbsp;&nbsp;</p>
+          <p id="subscribe">2024年12月26日</p>
         </div>
-        <div id="loginSection" class="hidden bg-white/50 size-full z-99 fixed top-0  flex items-center justify-center">
-            <div class="bg-white px-10 py-5 rounded-2xl ">
-                <div class="flex flex-col items-center gap-3">
-                    <input type="text" placeholder="账号" class="border p-3 rounded-xl text-black" id="account" />
-                    <input type="password" placeholder="密码" class="border p-3 rounded-xl text-black" id="password" />
-                    <button class="border rounded-xl bg-green-400 p-3 hover:bg-green-400/90" onclick="Login()">登录</button>
-                </div>
-            </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="main-body">
+
+    <!-- 搜索游戏并添加 -->
+    <div class="search-game">
+      <input class="search-game-input" placeholder="搜索游戏关键字">
+      <div class="search-game-grid">
+
+        <div class="search-game-grid-item">
+          <img class="search-game-grid-item-ad" src="assets/images/images/pubg-ad.png">
+          <div class="search-game-grid-item-name">绝地求生</div>
+          <div class="search-game-grid-item-focus">
+            <img onclick="" class="search-game-grid-item-focus-icon" src="assets/images/add.png">
+          </div>
         </div>
-        <div id="searchSection" class=" bg-white/50 size-full z-99 fixed top-0  flex items-center justify-center hidden">
-            <div class="bg-white px-3 py-5 rounded-2xl flex flex-col items-center gap-3 w-[60%]">
-                <div class="flex justify-center border-b-2 w-full items-center">
-                    <input type="text" placeholder="搜索某一款游戏" class=" p-3 rounded-xl text-black w-[32]" id="search" oninput="searchGameList()" />
-                    <button class=" top-3 right-3 bg-red-400 size-4 rounded-full text-white hover:bg-red-400/90 flex items-center justify-center" onclick="toggleSearchSection()">x
-                    </button>
-                </div>
-                <div id="searchResult" class=" overflow-y-auto max-h-[16]	   text-black  p-3 rounded-xl text-black w-[80%]  flex flex-col gap-3	 ">
-                </div>
+
+      </div>
+    </div>
+
+    <!-- 游戏详情页 -->
+    <div class="game-detail">
+      <img class="game-detail-bg" src="assets/images/images/dnf-bg.jpg"></img>
+      <div class="game-detail-body">
+
+        <div class="game-detail-body-title">
+          <div class="game-detail-body-title-name">战争雷霆 (国际服)</div>
+          <div class="game-detail-body-title-info">
+            最近加速:&nbsp;
+            <div id="game-detail-body-title-info-recent">
+              2024年8月26日 15:38:11
             </div>
+            &nbsp;&nbsp;&nbsp;&nbsp;累计加速:&nbsp;
+            <div id="game-detail-body-title-info-total">
+              13
+            </div>
+            小时
+          </div>
         </div>
+
+        <div class="game-detail-body-acc">
+          <div class="game-detail-body-acc-setting">
+
+            <select class="game-detail-body-acc-setting-zone">
+              <option value="option3">北美服</option>
+              <option value="option1">亚服</option>
+              <option value="option2">俄服</option>
+            </select>
+
+
+            <ul class="game-detail-body-acc-setting-route">
+              <script type="text/javascript">
+                var routeMode = 'auto';
+                function updateRouteMode(id) {
+                  console.log(id);
+                  if (id == 'route-mode-auto') {
+                    routeMode = 'auto';
+                    document.getElementById('route-mode-auto').style.listStyleType = 'disc';
+                    document.getElementById('route-mode-fix').style.listStyleType = 'circle';
+                  } else {
+                    routeMode = 'fix';
+                    document.getElementById('route-mode-auto').style.listStyleType = 'circle';
+                    document.getElementById('route-mode-fix').style.listStyleType = 'disc';
+                  }
+                }
+              </script>
+              <li onclick="updateRouteMode(this.id)" name="route-mode" id="route-mode-auto" style="list-style-type: disc; cursor: pointer;">智能路由</li>
+              <li onclick="updateRouteMode(this.id)" name="route-mode" id="route-mode-fix" style="list-style-type: circle; cursor: pointer;">固定路由</li>
+            </ul>
+          </div>
+
+          <div class="game-detail-body-acc-start">
+            <img src="assets/images/accelerate.png" class="game-detail-body-acc-start-icon">
+            <div class="game-detail-body-acc-start-text">加速游戏</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 加速中 -->
+    <div class="accelerate">
+
+      <div class="accelerate-detail">
+        <img class="accelerate-detail-img" src="assets/images/images/pubg-ad.png">
+
+        <div class="accelerate-detail-base">
+          <div class="accelerate-detail-base-info">
+            <div class="accelerate-detail-base-info-title">
+              <div class="accelerate-detail-base-info-title-name">战争雷霆(国际服)</div>
+
+              <div class="accelerate-detail-base-info-title-stats">
+                加速时长:&nbsp;
+                <div class="accelerate-detail-base-info-title-stats-duration">00:46:54</div>
+                &nbsp;&nbsp;&nbsp;&nbsp;加速流量:&nbsp;
+                <div class="accelerate-detail-base-info-title-stats-bytes">99.0KB</div>
+              </div>
+            </div>
+
+            <div class="accelerate-detail-base-info-stop">停止加速</div>
+          </div>
+
+          <div class="accelerate-detail-base-route">
+
+            <svg t="1724786337168" class="accelerate-detail-base-route-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="18463" width="48" height="48">
+              <path d="M306.688 624a93.312 93.312 0 1 1 0 186.666667 93.312 93.312 0 0 1 0-186.666667z m0 42.666667a50.688 50.688 0 1 0 0 101.333333 50.688 50.688 0 0 0 0-101.333333zM381.354667 288a93.354667 93.354667 0 1 1 0 186.666667 93.354667 93.354667 0 0 1 0-186.666667z m0 42.666667a50.688 50.688 0 1 0 0 101.333333 50.688 50.688 0 0 0 0-101.333333zM642.688 549.333333a93.312 93.312 0 1 1 0 186.666667 93.312 93.312 0 0 1 0-186.666667z m0 42.666667a50.688 50.688 0 1 0 0 101.333333 50.688 50.688 0 0 0 0-101.333333zM717.354667 213.333333a93.312 93.312 0 1 1 0 186.666667 93.312 93.312 0 0 1 0-186.666667z m0 42.666667a50.688 50.688 0 1 0 0 101.333333 50.688 50.688 0 0 0 0-101.333333z" p-id="18464"></path>
+              <path d="M692.437333 355.456l41.386667 10.368-56.96 227.797333-41.386667-10.368zM452.394667 423.594667l148.693333 149.248-30.250667 30.122666-148.693333-149.248zM341.76 441.898667l41.813333 8.106666-40.106666 206.250667-41.856-8.149333z" p-id="18465"></path>
+            </svg>
+            <div>本机</div>
+            <svg t="1724787454585" class="accelerate-detail-base-route-arrow" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="45364" width="48" height="48">
+              <path d="M 18.204 494.364 l 917.049 0 l 0 35.2711 l -917.049 0 l 0 -35.2711 Z" p-id="45365"></path>
+              <path d="M 829.44 459.094 L 1005.79 512 L 829.44 564.906 Z" p-id="45366"></path>
+            </svg>
+            <div id="route-link-gateway">北京</div>
+            <svg t="1724787454585" class="accelerate-detail-base-route-arrow" id="accelerate-detail-base-route-arrow-acc" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="45364" width="48" height="48">
+              <path d="M 18.204 494.364 l 917.049 0 l 0 35.2711 l -917.049 0 l 0 -35.2711 Z" p-id="45365"></path>
+              <path d="M 829.44 459.094 L 1005.79 512 L 829.44 564.906 Z" p-id="45366"></path>
+            </svg>
+            <div id="route-link-forward">莫斯科</div>
+            <svg t="1724787454585" class="accelerate-detail-base-route-arrow" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="45364" width="48" height="48">
+              <path d="M 18.204 494.364 l 917.049 0 l 0 35.2711 l -917.049 0 l 0 -35.2711 Z" p-id="45365"></path>
+              <path d="M 829.44 459.094 L 1005.79 512 L 829.44 564.906 Z" p-id="45366"></path>
+            </svg>
+            <div id="route-link-server">圣彼得堡</div>
+
+          </div>
+        </div>
+      </div>
+
+
+      <div class="accelerate-chart" id="accelerate-chart-delay"> </div>
+
+      <!-- <div class="accelerate-footer"> 延迟&nbsp;(ms) </div> -->
+
+      <div class="accelerate-chart" id="accelerate-chart-loss"> </div>
+
+      <!-- <div class="accelerate-footer">
+        ○&nbsp;上行&nbsp;&nbsp; ○&nbsp;下行&nbsp;&nbsp; ○&nbsp;合计
+      </div> -->
 
     </div>
+
+  </div>
+
 </body>
+
+<footer>
+  <script type="text/javascript">
+
+
+
+    class Stats {
+      constructor() {
+        this.period = 3000 // 数据点间隔 3s
+        this.count = 20
+        this.delay_id = "accelerate-chart-delay"
+        this.loss_id = "accelerate-chart-loss"
+        this.gateway_id = "route-link-gateway"
+        this.forward_id = "route-link-forward"
+        this.server_id = "route-link-server"
+        this.color = ['rgb(5,115,205)', 'rgb(255,137,2)']
+
+        this.delay = (function (ctx) {
+          var chart = echarts.init(document.getElementById(ctx.delay_id))
+
+          var option = {
+            title: {
+              text: '延迟 (ms)',
+              textStyle: { color: "#fafafa", fontSize: '12', fontWeight: 'normal' },
+              bottom: '0px', left: 'center',
+            },
+            color: ctx.color,
+            tooltip: {
+              trigger: 'axis',
+              confine: true,
+              formatter: function (params) {
+                console.log(params)
+                var time = params[0].data[0]
+                var h = time.getHours().toString().padStart(2, '0')
+                var m = time.getMinutes().toString().padStart(2, '0')
+                var s = time.getSeconds().toString().padStart(2, '0')
+
+                var gateway = params[0].data[1] === null ? 'null' : (params[0].data[1]).toString()
+                var forward = params[1].data[1] === null ? 'null' : (params[1].data[1]).toString()
+                var gateway_loc = params[0].data[2]
+                var forward_loc = params[1].data[2]
+
+                return `
+                  <div style="font-size:xx-small;">
+                    <div>${h}:${m}:${s}</div>
+                    <div style="color:${ctx.color[1]}">本机&nbsp;-&nbsp;${forward_loc}: ${forward}&nbsp;ms</div>
+                    <div style="color:${ctx.color[0]}">本机&nbsp;-&nbsp;${gateway_loc}: ${gateway}&nbsp;ms</div>
+                  </div>
+                `
+              },
+            },
+            xAxis: { type: 'time', show: false, },
+            yAxis: {
+              type: 'value',
+              splitLine: { show: true, lineStyle: { color: '#525359' } },
+              axisLabel: { formatter: '{value}ms' }
+            },
+            series: [],
+            grid: { left: '50px', right: '6px', top: '15px', bottom: '30px', }
+          };
+
+
+          var series = ['gateway', 'forward']
+          for (let i = 0; i < series.length; i++) {
+            option.series.push(
+              {
+                name: series[i], type: 'line', animationDuration: 400,
+                smooth: 0.4, data: [],
+                lineStyle: { width: 1 },
+                itemStyle: { opacity: 0.2 },
+              }
+            )
+          }
+          chart.setOption(option)
+          return chart
+        })(this)
+
+        this.loss = (function (ctx) {
+          var chart = echarts.init(document.getElementById(ctx.loss_id));
+          var names = ['上行丢包', '下行丢包']
+
+          var option = {
+            color: ctx.color,
+            tooltip: {
+              trigger: 'axis',
+              confine: true,
+              formatter: function (params) {
+                // console.log(params)
+
+                var time = params[0].data[0]
+                var h = time.getHours().toString().padStart(2, '0')
+                var m = time.getMinutes().toString().padStart(2, '0')
+                var s = time.getSeconds().toString().padStart(2, '0')
+
+                var loss1 = params[0].data[1] === null ? 'null' : (params[0].data[1]).toString()
+                var loss2 = params[1].data[1] === null ? 'null' : (params[1].data[1]).toString()
+                var gateway_loc = params[0].data[2]
+                var forward_loc = params[1].data[2]
+
+                if (params[0].seriesName == names[0]) {
+                  return `
+                    <div style="font-size:xx-small;">
+                      <div>${h}:${m}:${s}</div>
+                      <div style="color:${ctx.color[0]}">本机&nbsp;-&nbsp;${gateway_loc}: ${loss1}%</div>
+                      <div style="color:${ctx.color[1]}">${gateway_loc}&nbsp;-&nbsp;${forward_loc}: ${loss2}%</div>
+                    </div>
+                  `
+                } else {
+                  return `
+                    <div style="font-size:xx-small;">
+                      <div>${h}:${m}:${s}</div>
+                      <div style="color:${ctx.color[1]}">${forward_loc}&nbsp;-&nbsp;${gateway_loc}: ${loss2}&nbsp;%</div>
+                      <div style="color:${ctx.color[0]}">${gateway_loc}&nbsp;-&nbsp;本机: ${loss1}&nbsp;%</div>
+                    </div>
+                  `
+                }
+              },
+            },
+            legend: {
+              type: 'plain', data: names,
+              bottom: '0px', icon: 'none',
+              textStyle: { color: '#fafafa', fontSize: '12' },
+              selected: { "下行丢包": false },
+              selectedMode: 'single',
+            },
+
+            xAxis: { type: 'time', show: false, },
+            yAxis: {
+              type: 'value', min: 0, //max: 100,
+              splitLine: { show: true, lineStyle: { color: '#525359' } },
+              axisLabel: { formatter: '{value}%' }
+            },
+            series: [],
+            grid: { left: '50px', right: '6px', top: '15px', bottom: '30px', }
+          };
+
+          var start = new Date((new Date()).getTime() - (ctx.count - 1) * ctx.period);
+          for (let i = 0; i < names.length; i++) {
+            for (let j = 0; j < 2; j++) {
+              option.series.push(
+                {
+                  name: names[i], type: 'line', animationDuration: 400,
+                  smooth: 0.4, data: [],
+                  lineStyle: { width: 1 },
+                  itemStyle: { opacity: 0.2, color: ctx.color[j] },
+                }
+              )
+            }
+          }
+
+          chart.setOption(option)
+          return chart
+        })(this)
+      }
+
+      // 更新统计数据
+      push(stats) {
+        {
+          var f = function (v) {
+            return v == null ? " ? ? " : v
+          }
+          stats.gateway_loc = f(stats.gateway_loc)
+          stats.forward_loc = f(stats.forward_loc)
+          stats.server_loc = f(stats.server_loc)
+
+          document.getElementById(this.gateway_id).innerText = stats.gateway_loc
+          document.getElementById(this.forward_id).innerText = stats.forward_loc
+          document.getElementById(this.server_id).innerText = stats.server_loc
+        }
+        {
+          var opt = this.delay.getOption()
+          opt.xAxis = {
+            min: new Date(stats.time.getTime() - this.count * this.period),
+          }
+
+          var f = function (v) {
+            return v == null || v < 0.000001 || v > 300 ? null : v.toFixed(1)
+          }
+          opt.series[0].data.push([stats.time, f(stats.rtt_gateway), stats.gateway_loc])
+          opt.series[1].data.push([stats.time, f(stats.rtt_forward), stats.forward_loc])
+          this.delay.setOption(opt)
+        }
+        {
+          var opt = this.loss.getOption()
+          opt.xAxis = {
+            min: new Date(stats.time.getTime() - this.count * this.period),
+          }
+
+          var f = function (v) {
+            return v == null || v < 0.000001 || v > 100 ? null : v.toFixed(1)
+          }
+          opt.series[0].data.push([stats.time, f(stats.loss_client_uplink), stats.gateway_loc])
+          opt.series[1].data.push([stats.time, f(stats.loss_client_downlink), stats.forward_loc])
+          opt.series[2].data.push([stats.time, f(stats.loss_gateway_uplink), stats.gateway_loc])
+          opt.series[3].data.push([stats.time, f(stats.loss_gateway_downlink), stats.forward_loc])
+          this.loss.setOption(opt)
+        }
+      }
+    }
+
+    var stats = new Stats()
+
+    worker = new Worker('worker.js');
+    worker.onmessage = function (e) {
+
+      var rtt_gateay = 400
+      var loss_g_d = 0
+      if ((new Date().getSeconds() % 10 != 9)) {
+        rtt_gateay = Math.random() * 100
+        loss_g_d = Math.random()
+      }
+
+      stats.push({
+        time: new Date(),
+        gateway_loc: '北京',
+        forward_loc: '莫斯科',
+        server_loc: '圣彼得堡',
+
+        rtt_gateway: rtt_gateay,
+        rtt_forward: (100 + Math.random() * 50),
+
+        loss_client_uplink: Math.random() * 3,
+        loss_client_downlink: Math.random() * 1,
+        loss_gateway_uplink: Math.random(),
+        loss_gateway_downlink: loss_g_d,
+      })
+    }
+    worker.postMessage(stats.period) // start
+
+  </script>
+</footer>
 
 </html>
