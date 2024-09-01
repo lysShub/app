@@ -13,8 +13,14 @@
 // worker.onmessage = function (e) { console.log(new Date()); }
 // worker.postMessage('start')
 
+var interval
 self.onmessage = function (e) {
-  setInterval(() => {
-    self.postMessage(`signal`);
-  }, e.data);
+  if (e.data > 0) {
+    if (interval == null) { clearInterval(interval) }
+    interval = setInterval(() => {
+      self.postMessage(`signal`)
+    }, e.data)
+  } else if (interval !== null && e.data == 0) {
+    clearInterval(interval)
+  }
 };

@@ -10,9 +10,9 @@ export namespace main {
 	    Accelerating = 6,
 	    InvalidMonths = 7,
 	    GameExist = 8,
-	    NotAccelerated = 9,
-	    RequireGameId = 10,
-	    Unknown = 11,
+	    NotAccelerated = 10,
+	    RequireGameId = 11,
+	    Unknown = 12,
 	}
 	export class Message {
 	    code: MsgCode;
@@ -32,6 +32,8 @@ export namespace main {
 	}
 	export class Stats {
 	    stamp: number;
+	    seconds: number;
+	    bytes: number;
 	    gateway_loc: string;
 	    forward_loc: string;
 	    server_loc: string;
@@ -49,6 +51,8 @@ export namespace main {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.stamp = source["stamp"];
+	        this.seconds = source["seconds"];
+	        this.bytes = source["bytes"];
 	        this.gateway_loc = source["gateway_loc"];
 	        this.forward_loc = source["forward_loc"];
 	        this.server_loc = source["server_loc"];
@@ -59,36 +63,6 @@ export namespace main {
 	        this.loss_gateway_uplink = source["loss_gateway_uplink"];
 	        this.loss_gateway_downlink = source["loss_gateway_downlink"];
 	    }
-	}
-	export class StatsList {
-	    list: Stats[];
-	
-	    static createFrom(source: any = {}) {
-	        return new StatsList(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.list = this.convertValues(source["list"], Stats);
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
 	}
 
 }

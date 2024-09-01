@@ -16,7 +16,9 @@ type Message struct {
 //go:generate stringer -linecomment -output app_gen.go -type=MsgCode
 type MsgCode int
 
-func (c MsgCode) Message() Message { return Message{Code: c, Msg: c.String()} }
+func (c MsgCode) Message(data any) Message {
+	return Message{Code: c, Msg: c.String(), Data: data}
+}
 func (c MsgCode) TSName() string {
 	if c >= _end {
 		panic(c)
@@ -34,8 +36,9 @@ const (
 	Accelerating                  // 游戏已在加速
 	InvalidMonths                 // 无效月数
 	GameExist                     // 游戏已存在
+	GameNotExist                  // 游戏不存在
 	NotAccelerated                // 没有加速
-	RequireGameId                 // 请指定游戏
+	RequireGameId                 // 未指定游戏
 	Unknown                       // 未知
 	_end
 )
@@ -50,6 +53,7 @@ var codeLits = []string{
 	"Accelerating",
 	"InvalidMonths",
 	"GameExist",
+	"GameNotExist",
 	"NotAccelerated",
 	"RequireGameId",
 	"Unknown",
@@ -69,20 +73,33 @@ var codes = []MsgCode{
 	Unknown,
 }
 
-type GameId = int32 // 最小值为1
+type UserInfo struct {
+	Name     string `json:"name"`
+	Password string `json:"password"`
+	Phone    string `json:"phone"`
+	Expire   int64  `json:"expire"` // utc 时间戳
+	Icon     string `json:"icon"`
+}
+
+type GameId = int64 // 最小值为1
 
 type GameInfo struct {
 	GameId      GameId   `json:"game_id"`
 	Name        string   `json:"name"`
 	IconPath    string   `json:"icon_path"`
 	BgimgPath   string   `json:"bgimg_path"`
-	GameServers []string `json:"game_servers"`
+	AdimgPath   string   `json:"adimg_path"`
+	GameServers []string `json:"game_servers"` // 第一个为默认值
+	FixRoute    bool     `json:"fix_route"`
 
-	CacheGameServer string `json:"cache_game_server"`
-	CacheFixRoute   bool   `json:"cache_fix_route"`
-	LastActive      int64  `json:"last_active"` // utc 时间戳
-	Duration        int64  `json:"duration"`
-	Flow            int64  `json:"flow"` // 加速流量
+	LastActive   int64 `json:"last_active"`   // utc 时间戳
+	TotalSeconds int64 `json:"total_seconds"` // 累计加速时间(s)
+	TotalBytes   int64 `json:"total_bytes"`   // 累计加速流量(B)
+}
+type GameInfos struct {
+	SelectGame GameId     `json:"select_game"`
+	AcceleGame GameId     `json:"accele_game"`
+	Games      []GameInfo `json:"games"`
 }
 
 type App struct {
@@ -99,22 +116,9 @@ func (a *App) domReady(ctx context.Context)                   {}
 func (a *App) beforeClose(ctx context.Context) (prevent bool) { return false }
 func (a *App) shutdown(ctx context.Context)                   {}
 
-type UserInfo struct {
-	Name     string `json:"name"`
-	Password string `json:"password"`
-	Phone    string `json:"phone"`
-	Expire   int64  `json:"expire"` // utc 时间戳
-}
-
 // GetUser 获取用户信息, 应用渲染完成即调用此函数, 如果msg.Code==NotLogin, 则弹出注册登录页面
-
 func (a *App) GetUser() Message {
-	user, message := a.Mock.GetUser()
-	return Message{
-		Code: message.Code,
-		Msg:  message.Msg,
-		Data: user,
-	}
+	return a.Mock.GetUser()
 }
 
 // RegisterOrLogin 注册或登录,
@@ -126,61 +130,33 @@ func (a *App) RegisterOrLogin(user, pwd string) (msg Message) {
 // Recharge 充值，返回一个字符二维码、和一个全局事件。参考 https://wails.io/zh-Hans/docs/reference/runtime/events
 // 回调返回结果是Message类型
 func (a *App) Recharge(months int, eventName string) Message {
-	path, message := a.Mock.Recharge(months, func(m Message) {
+	return a.Mock.Recharge(months, func(m Message) {
 		runtime.EventsEmit(a.ctx, eventName, m)
 	})
-	return Message{
-		Code: message.Code,
-		Msg:  message.Msg,
-		Data: path,
-	}
 }
 
 // ListGames 获取已添加的游戏列表, selectedIdx 表示默认应该选中的游戏
-
 func (a *App) ListGames() Message {
-	list, idx, msg := a.Mock.ListGames()
-	return Message{
-		Code: msg.Code,
-		Msg:  msg.Msg,
-		Data: struct {
-			List        []GameInfo `json:"list"`
-			SelectedIdx int        `json:"selected_idx"`
-		}{
-			List:        list,
-			SelectedIdx: idx,
-		},
-	}
+	return a.Mock.ListGames()
+}
+
+func (a *App) GetGame(id GameId) Message {
+	return a.Mock.GetGame(id)
 }
 
 // SelectGame 选中某个游戏
 func (a *App) SelectGame(gameId GameId) Message {
-	game, message := a.Mock.SelectGame(gameId)
-	return Message{
-		Code: message.Code,
-		Msg:  message.Msg,
-		Data: game,
-	}
+	return a.Mock.SelectGame(gameId)
 }
 
 // GetSelectedGame 获取当前选中的游戏
 func (a *App) GetSelectedGame() Message {
-	game, message := a.Mock.GetSelectedGame()
-	return Message{
-		Code: message.Code,
-		Msg:  message.Msg,
-		Data: game,
-	}
+	return a.Mock.GetSelectedGame()
 }
 
 // SearchGame 根据关键字搜索游戏
 func (a *App) SearchGame(keyword string) Message {
-	game, message := a.Mock.SearchGame(keyword)
-	return Message{
-		Code: message.Code,
-		Msg:  message.Msg,
-		Data: game,
-	}
+	return a.Mock.SearchGame(keyword)
 }
 
 // AddGame 新增游戏
@@ -188,37 +164,35 @@ func (a *App) AddGame(gameId GameId) Message {
 	return a.Mock.AddGame(gameId)
 }
 
-// SetGame 选择某个游戏
-func (a *App) SetGame(gameId GameId) Message {
-	return a.Mock.SetGame(gameId)
+// DelGame 删除游戏
+func (a *App) DelGame(gameId GameId) Message {
+	return a.Mock.DelGame(gameId)
 }
 
 // SetGameServer 设置游戏区服
-func (a *App) SetGameServer(id GameId, gameServer string) Message {
-	return a.Mock.SetGameServer(id, gameServer)
+func (a *App) SetGameServer(gameServer string) Message {
+	return a.Mock.SetGameServer(gameServer)
 }
 
 // SetRouteMode 选择路由模式
-func (a *App) SetRouteMode(id GameId, fixRoute bool) Message {
-	return a.Mock.SetRouteMode(id, fixRoute)
+func (a *App) SetRouteMode(fixRoute bool) Message {
+	return a.Mock.SetRouteMode(fixRoute)
 }
 
-// Accelerate 开始加速
-func (a *App) Accelerate(id GameId) Message {
-	return a.Mock.Accelerate(id)
+// StartAccele 开始加速
+func (a *App) StartAccele(id GameId) Message {
+	return a.Mock.StartAccele(id)
 }
 
-// DisableAccelerate 停止加速
-func (a *App) DisableAccelerate() Message {
-	return a.Mock.DisableAccelerate()
-}
-
-type StatsList struct {
-	List []Stats `json:"list"`
+// StopAccele 停止加速
+func (a *App) StopAccele() Message {
+	return a.Mock.StopAccele()
 }
 
 type Stats struct {
-	MilliStamp int `json:"stamp"` // 本数据点对应的时间戳
+	Stamp   int64 `json:"stamp"`   // 本数据点对应的毫秒时间戳
+	Seconds int64 `json:"seconds"` // 本次加速时长
+	Bytes   int64 `json:"bytes"`   // 本次加速流量
 
 	GatewayLoc string `json:"gateway_loc"` // gateway所在城市名
 	ForwardLoc string `json:"forward_loc"` // forward所在城市名
@@ -234,6 +208,6 @@ type Stats struct {
 }
 
 // Stats 获取统计信息, 阻塞函数, 如果距上次调用时间短于3s, 会主动阻塞直到恰好相距3s
-func (a *App) Stats() StatsList {
+func (a *App) Stats() Stats {
 	return a.Mock.Stats()
 }

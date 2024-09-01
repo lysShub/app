@@ -8,10 +8,10 @@
   
   /* 指定body区域 */
   position: fixed;
-  top: 10px;
-  right: 10px;
-  bottom: 10px;
-  left: 10px;
+  top: 5px;
+  right: 5px;
+  bottom: 5px;
+  left: 5px;
 }
 
 
@@ -43,36 +43,64 @@
 .games-item {
   height: 40px;
   display: flex;
+  justify-content: flex-start;
   align-items: center;
   border-radius: 5px;
-  margin: 3px;
-
+  margin: 3px; 
   cursor: pointer;  
 }
 .games-item:hover{
   background-color: rgb(64, 64,64);
 }
+.games-item:hover .games-item-name{
+  max-width: 5rem;
+}
+.games-item:hover .games-item-delete{
+  display: block !important;
+}
 .games-item-icon {
-  margin-left: 5px;
-  width: 30px;
-  max-height: 20px;
-  margin-right: 5px;
+  display: flex;
+  justify-content: center; 
+  align-items: center;    
+  margin: 0px 5px;
+  width: 30px ;
+  height: 20px;
 }
 .games-item-name {
+  max-width: 6rem;
+  margin-bottom: 2px;
   font-size: xx-small; 
   white-space: nowrap; 
   overflow: hidden;  
   text-overflow: ellipsis; 
 }
+.games-item-delete{
+  margin-left: auto; 
+  width: 1rem;
+  fill: rgb(250, 250,250);
+  margin-bottom: 2px;
+}
+.games-item-delete:hover{
+  fill: red;
+}
+.games-item-acc{
+  margin-left: auto; 
+  width: 1rem;
+  /* margin-bottom: 2px; */
+  fill: red;
+}
 #games-add{
-  height: 50px;
+  margin-top: 10px;
+  height: 50px; 
 }
 #games-add-item{
   color: rgba(240, 240, 240, 0.8);
   font-size: xx-small;
   cursor: pointer;
   border-radius: 3px;
-  margin: 3px;
+
+  margin: 0px 3px 0px 3px;
+  padding: 5px 0px 5px 0px;
 }
 #games-add-item:hover{
   background-color: rgb(64, 64,64);
@@ -126,13 +154,16 @@
   align-items: center;
 }
 #search-game-input{
-  color: rgba(230, 230, 230, 0.8);
   background: transparent;
-  border: 1px solid rgba(230, 230, 230, 0.8);
+  color:  rgba(240, 240, 240, 1);
+  border: 1px solid rgba(240, 240, 240, 1);
   border-radius: 5px;
   padding-left: 5px;
   margin-bottom: 20px;
   height: 20px;
+}
+#search-game-input::placeholder{
+  color: rgba(230, 230, 230, 0.8);
 }
 #search-game-grid{
   display: flex;
@@ -157,9 +188,10 @@
 }
 .search-game-grid-item-name{
   color: rgb(240, 240, 240);
-  height: 20px;
+  height: 2em;
   font-size: xx-small;
   text-align: center;
+  overflow: hidden;
 }
 .search-game-grid-item:hover  .search-game-grid-item-focus{
   visibility: inherit;
@@ -185,7 +217,7 @@
 
 
 #game-detail{
-  display: flex; 
+  display: none; 
 
   position: absolute;
   top: 0px;
@@ -196,7 +228,7 @@
 }
 #game-detail-bg{
   min-height: 100%;
-  min-width: 100%;
+  /* min-width: 100%; */
 }
 #game-detail-body{
   border-radius: 10px;
@@ -264,7 +296,7 @@
   padding: 5px;
   padding-right: 10px;
   border-radius: 5px;
-  background-color: rgb(254, 101,82);
+  background-color: #fe6552; 
   color: white;
   cursor: pointer;
 }

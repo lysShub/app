@@ -17,9 +17,9 @@ import (
 )
 
 type Mock struct {
-	SelectedGame    GameId // store GameId
-	AcceleratedGame GameId // store GameId
-	AddedGames      []GameId
+	SelectedGame GameId // store GameId
+	AcceleedGame GameId // store GameId
+	AddedGames   []GameId
 
 	User  UserInfo
 	Games map[GameId]GameInfo
@@ -27,7 +27,6 @@ type Mock struct {
 	// temp
 	qrImgPath string
 	statsTime time.Time
-	head      *Heap[Stats]
 }
 
 func (i *Mock) init() *Mock {
@@ -42,51 +41,58 @@ func (i *Mock) init() *Mock {
 			Name:     "test",
 			Password: "1234567",
 			Phone:    "13448612544",
+			Icon:     "./assets/images/logo-universal.png",
 			Expire:   time.Now().AddDate(1, 0, 0).Unix(),
 		}
 
 		i.Games = map[GameId]GameInfo{
 			1: {
-				GameId:      1,
-				Name:        "csgo",
-				IconPath:    "./assets/images/images/csgo-icon.png",
-				BgimgPath:   "./assets/images/images/csgo-bg.jpg",
-				GameServers: []string{"美服", "欧服", "亚服"},
-				LastActive:  time.Now().Local().AddDate(0, 0, 0).Unix(),
-				Duration:    1000,
-				Flow:        1000,
+				GameId:       1,
+				Name:         "反恐精英",
+				IconPath:     "./assets/images/images/csgo-icon.png",
+				BgimgPath:    "./assets/images/images/csgo-bg.png",
+				AdimgPath:    "./assets/images/images/csgo-ad.jpg",
+				GameServers:  []string{"美服", "欧服", "亚服"},
+				LastActive:   time.Now().Local().AddDate(0, 0, 0).Unix(),
+				TotalSeconds: 5645,
+				TotalBytes:   145234,
 			},
 			2: {
-				GameId:      1,
-				Name:        "地下城与勇士",
-				IconPath:    "./assets/images/images/dnf-icon.png",
-				BgimgPath:   "./assets/images/images/dnf-bg.jpg",
-				GameServers: []string{"台服", "北美服", "日服"},
-				LastActive:  time.Now().Local().AddDate(-1, 0, 0).Unix(),
-				Duration:    3000,
-				Flow:        20000,
+				GameId:       2,
+				Name:         "地下城与勇士阿巴阿巴阿巴阿巴",
+				IconPath:     "./assets/images/images/dnf-icon.png",
+				BgimgPath:    "./assets/images/images/dnf-bg.jpg",
+				AdimgPath:    "./assets/images/images/dnf-ad.jpg",
+				GameServers:  []string{"台服", "北美服", "日服"},
+				LastActive:   time.Now().Local().AddDate(-1, 0, 0).Unix(),
+				TotalSeconds: 13435,
+				TotalBytes:   6733412,
 			},
 			3: {
-				GameId:      3,
-				Name:        "绝地求生",
-				IconPath:    "./assets/images/images/pubg-icon.png",
-				BgimgPath:   "./assets/images/images/pubg-bg.jpg",
-				GameServers: []string{"国际服", "国服", "日服"},
-				LastActive:  time.Now().Local().AddDate(-1, -2, 0).Unix(),
-				Duration:    2000,
-				Flow:        33000,
+				GameId:       3,
+				Name:         "绝地求生",
+				IconPath:     "./assets/images/images/pubg-icon.png",
+				BgimgPath:    "./assets/images/images/pubg-bg.jpg",
+				AdimgPath:    "./assets/images/images/pubg-ad.png",
+				GameServers:  []string{"国际服", "国服", "日服"},
+				LastActive:   time.Now().Local().AddDate(-1, -2, 0).Unix(),
+				TotalSeconds: 3452,
+				TotalBytes:   457234,
 			},
 		}
+		i.AddedGames = []GameId{
+			2, 3,
+		}
+		i.SelectedGame = i.AddedGames[0]
 	} else {
 		if err := gob.NewDecoder(fh).Decode(i); err != nil {
 			panic(err)
 		}
-		i.AcceleratedGame = 0
+		i.AcceleedGame = 0
 	}
 
 	i.qrImgPath = "./assets/images/qr-alipay-img.png"
 	i.statsTime = time.Time{}
-	i.head = NewHeap[Stats]()
 	return i
 }
 
@@ -125,17 +131,17 @@ func (i *Mock) gameIdValid(id GameId) bool {
 }
 func (i *Mock) logined() bool { return i.User.Name != "" }
 
-func (a *Mock) GetUser() (info UserInfo, msg Message) {
+func (a *Mock) GetUser() (msg Message) {
 	if !a.logined() {
-		return UserInfo{}, NotLogin.Message()
+		return NotLogin.Message(nil)
 	} else {
-		return a.User, OK.Message()
+		return OK.Message(a.User)
 	}
 }
 
 func (a *Mock) RegisterOrLogin(user, pwd string) (msg Message) {
 	if a.logined() {
-		return IsLogined.Message()
+		return IsLogined.Message(nil)
 	} else {
 		a.User.Name = user
 		a.User.Password = pwd
@@ -144,15 +150,15 @@ func (a *Mock) RegisterOrLogin(user, pwd string) (msg Message) {
 		slog.Info("log", slog.String("user", user), slog.String("pwd", pwd))
 
 		a.sync()
-		return OK.Message()
+		return OK.Message(nil)
 	}
 }
 
-func (a *Mock) Recharge(months int, callback func(Message)) (qrImagePath string, msg Message) {
+func (a *Mock) Recharge(months int, callback func(Message)) (msg Message) {
 	if months <= 0 {
-		return "", InvalidMonths.Message()
+		return InvalidMonths.Message("")
 	} else if !a.logined() {
-		return "", NotLogin.Message()
+		return NotLogin.Message("")
 	}
 
 	go func() {
@@ -166,177 +172,200 @@ func (a *Mock) Recharge(months int, callback func(Message)) (qrImagePath string,
 			callback(Message{Code: Unknown, Msg: "支付失败, xxxx"})
 		}
 	}()
-	return a.qrImgPath, OK.Message()
+	return OK.Message(a.qrImgPath)
 }
 
-func (a *Mock) ListGames() (list []GameInfo, selectedIdx int, msg Message) {
+func (a *Mock) ListGames() (msg Message) {
 	if !a.logined() {
-		return nil, -1, NotLogin.Message()
+		return NotLogin.Message(nil)
 	}
 
-	for i, id := range a.AddedGames {
-		list = append(list, a.Games[id])
-		if id == a.SelectedGame {
-			selectedIdx = i
-		}
+	var gs = GameInfos{SelectGame: a.SelectedGame, AcceleGame: a.AcceleedGame}
+	for _, id := range a.AddedGames {
+		gs.Games = append(gs.Games, a.Games[id])
 	}
-	return list, selectedIdx, OK.Message()
+	return OK.Message(gs)
 }
 
-func (a *Mock) SelectGame(gameId GameId) (GameInfo, Message) {
+func (a *Mock) GetGame(id GameId) Message {
 	if !a.logined() {
-		return GameInfo{}, NotLogin.Message()
-	} else if !a.gameIdValid(gameId) {
-		return GameInfo{}, RequireGameId.Message()
+		return NotLogin.Message(nil)
+	} else if !a.gameIdValid(id) {
+		return RequireGameId.Message(nil)
 	}
-
-	return a.Games[gameId], OK.Message()
+	return OK.Message(a.Games[id])
 }
 
-func (a *Mock) GetSelectedGame() (GameInfo, Message) {
+func (a *Mock) SelectGame(id GameId) Message {
 	if !a.logined() {
-		return GameInfo{}, NotLogin.Message()
+		return NotLogin.Message(nil)
+	} else if !a.gameIdValid(id) {
+		return RequireGameId.Message(nil)
+	} else if !slices.Contains(a.AddedGames, id) {
+		return Notfound.Message(nil)
+	}
+
+	a.SelectedGame = id
+	a.sync()
+	return a.ListGames()
+}
+
+func (a *Mock) GetSelectedGame() Message {
+	if !a.logined() {
+		return NotLogin.Message(nil)
 	}
 
 	if a.SelectedGame == 0 {
-		return GameInfo{}, NotSelectGame.Message()
+		return NotSelectGame.Message(nil)
 	} else {
-		return a.Games[a.SelectedGame], OK.Message()
+		return OK.Message(a.Games[a.SelectedGame])
 	}
-
 }
 
-func (a *Mock) SearchGame(keyword string) (list []GameInfo, msg Message) {
+func (a *Mock) SearchGame(keyword string) (msg Message) {
 	if !a.logined() {
-		return nil, NotLogin.Message()
+		return NotLogin.Message(nil)
 	}
 
-	if keyword == "" {
-		return nil, OK.Message()
-	}
-
+	var list []GameInfo
 	for _, e := range a.Games {
-		if strings.ContainsAny(e.Name, keyword) {
+		if !slices.Contains(a.AddedGames, e.GameId) &&
+			(keyword == "" || strings.ContainsAny(e.Name, keyword)) {
+
 			list = append(list, e)
 		}
 	}
-	return list, OK.Message()
+
+	return OK.Message(list)
 }
 
 func (a *Mock) AddGame(gameId GameId) Message {
 	if !a.logined() {
-		return NotLogin.Message()
+		return NotLogin.Message(nil)
 	} else if !a.gameIdValid(gameId) {
-		return RequireGameId.Message()
-	}
-
-	if slices.Contains(a.AddedGames, gameId) {
-		return GameExist.Message()
+		return RequireGameId.Message(nil)
+	} else if slices.Contains(a.AddedGames, gameId) {
+		return GameExist.Message(nil)
 	}
 
 	a.AddedGames = append(a.AddedGames, gameId)
-	a.sync()
-	return OK.Message()
-}
-
-func (a *Mock) SetGame(gameId GameId) Message {
-	if !a.logined() {
-		return NotLogin.Message()
-	} else if !a.gameIdValid(gameId) {
-		return RequireGameId.Message()
-	}
-
 	a.SelectedGame = gameId
 	a.sync()
-	return OK.Message()
+	return a.ListGames()
 }
 
-func (a *Mock) SetGameServer(gameId GameId, gameServer string) Message {
+func (a *Mock) DelGame(gameId GameId) Message {
 	if !a.logined() {
-		return NotLogin.Message()
+		return NotLogin.Message(nil)
 	} else if !a.gameIdValid(gameId) {
-		return RequireGameId.Message()
+		return RequireGameId.Message(nil)
+	} else if !slices.Contains(a.AddedGames, gameId) {
+		return GameNotExist.Message(nil)
 	}
 
-	g := a.Games[gameId]
+	a.AddedGames = slices.DeleteFunc(a.AddedGames, func(id GameId) bool { return id == gameId })
+	if a.SelectedGame == gameId {
+		if len(a.AddedGames) > 0 {
+			a.SelectedGame = a.AddedGames[0]
+		} else {
+			a.SelectedGame = 0
+		}
+	}
+
+	a.sync()
+	return a.ListGames()
+}
+
+func (a *Mock) SetGameServer(gameServer string) Message {
+	if !a.logined() {
+		return NotLogin.Message(nil)
+	} else if !a.gameIdValid(a.SelectedGame) {
+		return RequireGameId.Message(nil)
+	}
+
+	g := a.Games[a.SelectedGame]
 
 	i := slices.Index(g.GameServers, gameServer)
 	if i == -1 {
 		panic(fmt.Sprintf("unknown game %s server %s", g.Name, gameServer))
-	}
-	g.CacheGameServer = gameServer
-
-	a.Games[gameId] = g
-	a.sync()
-	return OK.Message()
-}
-
-func (a *Mock) SetRouteMode(gameId GameId, fixRoute bool) Message {
-	if !a.logined() {
-		return NotLogin.Message()
-	} else if !a.gameIdValid(gameId) {
-		return GameExist.Message()
+	} else if i != 0 {
+		g.GameServers[i], g.GameServers[0] = g.GameServers[0], g.GameServers[i]
+		a.Games[a.SelectedGame] = g
+		a.sync()
 	}
 
-	g := a.Games[gameId]
-	g.CacheFixRoute = fixRoute
-	a.Games[gameId] = g
-
-	a.sync()
-	return OK.Message()
+	return OK.Message(nil)
 }
 
-func (a *Mock) Accelerate(gameId GameId) Message {
+func (a *Mock) SetRouteMode(fixRoute bool) Message {
 	if !a.logined() {
-		return NotLogin.Message()
+		return NotLogin.Message(nil)
+	} else if !a.gameIdValid(a.SelectedGame) {
+		return GameExist.Message(nil)
+	}
+
+	g := a.Games[a.SelectedGame]
+	if g.FixRoute != fixRoute {
+		g.FixRoute = fixRoute
+		a.Games[a.SelectedGame] = g
+		a.sync()
+	}
+	return OK.Message(g)
+}
+
+func (a *Mock) StartAccele(gameId GameId) Message {
+	if !a.logined() {
+		return NotLogin.Message(nil)
 	} else if a.User.Expire < time.Now().Unix() {
-		return VIPExpired.Message()
+		return VIPExpired.Message(nil)
 	} else if !a.gameIdValid(gameId) {
-		return RequireGameId.Message()
-	} else if a.AcceleratedGame != 0 {
-		return Message{Code: Accelerating, Msg: fmt.Sprintf("%s 正在加速", a.Games[a.AcceleratedGame].Name)}
+		return RequireGameId.Message(nil)
+	} else if a.AcceleedGame != 0 {
+		return Message{Code: Accelerating, Msg: fmt.Sprintf("%s 正在加速", a.Games[a.AcceleedGame].Name)}
 	}
 
-	a.AcceleratedGame = gameId
+	a.AcceleedGame = gameId
 
 	info := a.Games[gameId]
-	slog.Info("开始加速", slog.String("name", info.Name), slog.String("server", info.CacheGameServer), slog.Bool("fix-route", info.CacheFixRoute))
+	slog.Info("开始加速", slog.String("name", info.Name), slog.String("server", info.GameServers[0]), slog.Bool("fix-route", info.FixRoute))
 
 	a.sync()
-	return OK.Message()
+	return a.ListGames()
 }
 
-func (a *Mock) DisableAccelerate() Message {
+func (a *Mock) StopAccele() Message {
 	if !a.logined() {
-		return NotLogin.Message()
-	} else if a.AcceleratedGame == 0 {
-		return NotAccelerated.Message()
+		return NotLogin.Message(nil)
+	} else if a.AcceleedGame == 0 {
+		return NotAccelerated.Message(nil)
 	}
 
-	a.AcceleratedGame = 0
+	a.AcceleedGame = 0
 	a.sync()
-	return OK.Message()
+	return a.ListGames()
 }
 
 var RandNew *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
-func (a *Mock) Stats() (s StatsList) {
+func (a *Mock) Stats() (s Stats) {
 	time.Sleep(time.Until(a.statsTime.Add(time.Second * 3)))
 	a.statsTime = time.Now()
 
-	a.head.Put(randStats())
-	return StatsList{List: a.head.List()}
+	return randStats()
 }
 
 func randStats() Stats {
 	var s = Stats{
-		MilliStamp: int(time.Now().Unix()),
+		Stamp:   time.Now().UnixMilli(),
+		Seconds: 8234,
+		Bytes:   345254,
+
 		GatewayLoc: "北京",
 		ForwardLoc: "莫斯科",
 		ServerLoc:  "圣彼得堡",
 	}
 
-	s.RttGateway = 60 + time.Duration(rand.Intn(60))
+	s.RttGateway = 30 + time.Duration(rand.Intn(30))
 	s.RttForward = s.RttGateway + 90
 
 	s.LossClientUplink = f(1.5 + rand.Float64()*3)
@@ -347,29 +376,3 @@ func randStats() Stats {
 }
 
 func f(v float64) float64 { return math.Round(v*100) / 100 }
-
-type Heap[T Stats | int] struct {
-	cache []T
-	i     int // head
-}
-
-func NewHeap[T Stats | int]() *Heap[T] {
-	return &Heap[T]{
-		cache: make([]T, 60),
-	}
-}
-
-func (h *Heap[T]) Put(s T) {
-	h.cache[h.i] = s
-
-	n := len(h.cache)
-	h.i = (h.i + 1) % n
-}
-
-func (h *Heap[T]) List() []T {
-	var ss = make([]T, 0, len(h.cache))
-
-	ss = append(ss, h.cache[h.i:]...)
-	ss = append(ss, h.cache[:h.i]...)
-	return ss
-}

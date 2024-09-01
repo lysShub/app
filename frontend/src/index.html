@@ -8,22 +8,10 @@
   <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgo=">
   <!-- Main Source Files -->
   <link rel="stylesheet" href="main.css" />
-  <!-- <link rel="stylesheet" href="./tailwind.css"> -->
 
-  <!-- <script src="https://cdn.tailwindcss.com"></script> -->
-  <script src="./main.js"></script>
-  <script src="./wails/runtime.js"></script>
-  <script src="./echarts.min.js"></script>
-  <script>
-
-
-    // function test() {
-    //   var elem = document.getElementsByClassName('search-game-grid-item')[0];
-    //   var newElem = elem.cloneNode(true);
-    //   elem.parentElement.appendChild(newElem);
-    //   console.log(elem.innerHTML);
-    // }
-  </script>
+  <script src="main.js"></script>
+  <script src="echarts.min.js"></script>
+  <script src="wails/runtime.js"></script>
 </head>
 
 <body id="body">
@@ -32,23 +20,32 @@
     <div id="games">
       <div id="games-list">
 
-        <div class="games-item">
-          <img class="games-item-icon" src="./assets/images/images/pubg-icon.png" />
-          <p class="games-item-name">战争雷霆 (国际服)</p>
-        </div>
-        <div class="games-item">
-          <img class="games-item-icon" src="./assets/images/images/csgo-icon.png" />
-          <p class="games-item-name">反恐精英</p>
-        </div>
-        <div class="games-item">
-          <img class="games-item-icon" src="./assets/images/images/dnf-icon.png" />
-          <p class="games-item-name">地下城与勇士</p>
+        <div class="games-item" id="games-item-template" style="display: none;" onclick="app.SelectGame(Number(this.dataset.game))">
+
+          <div class=" games-item-icon">
+            <img style="max-width: 30px; max-height: 20px;" src="./assets/images/images/pubg-icon.png" />
+          </div>
+          <div class="games-item-name">战争雷霆 (国际服)</div>
+
+          <div class="games-item-delete" style="display: none;">
+            <svg onclick="app.DelGame(Number(this.parentElement.parentElement.dataset.game),event)" style="display: block;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3182">
+              <path d="M668.734694 532.897959H355.265306c-11.493878 0-20.897959-9.404082-20.897959-20.897959s9.404082-20.897959 20.897959-20.897959h313.469388c11.493878 0 20.897959 9.404082 20.897959 20.897959s-9.404082 20.897959-20.897959 20.897959z" p-id="3183"></path>
+              <path d="M512 929.959184c-230.4 0-417.959184-187.559184-417.959184-417.959184s187.559184-417.959184 417.959184-417.959184 417.959184 187.559184 417.959184 417.959184-187.559184 417.959184-417.959184 417.959184z m0-794.122449c-207.412245 0-376.163265 168.75102-376.163265 376.163265s168.75102 376.163265 376.163265 376.163265 376.163265-168.75102 376.163265-376.163265-168.75102-376.163265-376.163265-376.163265z" p-id="3184"></path>
+            </svg>
+
+            <svg style="display: none;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4801" id="mx_n_1725154415875">
+              <path d="M492.9 304.4c-8.7 8.7-13.4 20.2-13.4 32.4s4.8 23.8 13.4 32.4c8.7 8.7 20.2 13.4 32.4 13.4s23.8-4.8 32.4-13.4c17.9-17.9 17.9-47 0-64.8-17.3-17.4-47.5-17.4-64.8 0z m49.1 49.1c-8.9 8.9-24.5 8.9-33.4 0-4.5-4.5-6.9-10.4-6.9-16.7 0-6.3 2.5-12.2 6.9-16.7 4.5-4.5 10.4-6.9 16.7-6.9s12.2 2.5 16.7 6.9c9.2 9.2 9.2 24.2 0 33.4z" fill="#fe6552" p-id="4802"></path>
+              <path d="M761.3 633.9l-0.9-0.5 0.9-0.9-110.8-110.7c14-42.7 21.7-92.4 21.7-143.6 0-145.9-126.7-261-132.1-265.9L525.3 99l-14.8 13.3c-5.4 4.8-132 119.9-132 265.9 0 52.1 7.9 102.7 22.4 145.8L291.5 633.4l-1.1 0.6 0.2 0.3-0.2 0.2 0.5 0.5 58.4 113.6 0.2-0.1 10.5 20.4 82.4-42.5h166.8l82.4 42.5 10.5-20.4 0.2 0.1 59-114.7zM619.9 682v-0.2H431.7v0.1l-0.1-0.1L379 709l-34-66.2 107-107 0.7-0.3c-19.2-42.9-29.8-98.8-29.8-157.2 0-98.3 70.8-184.4 102.4-217.9 31.6 33.5 102.4 119.6 102.4 217.9 0 57.2-10.2 112.1-28.7 154.7l0.5 0.2-0.3 0.3 108.2 108.2-34.7 67.3-52.7-27.2-0.1 0.2z" fill="#fe6552" p-id="4803"></path>
+              <path d="M528.1 792.9c-1 2.1-3.6 2.1-4.6 0l-11.8-24.1h-52.8c0 65.9 66.9 119.3 66.9 119.3s66.9-53.4 66.9-119.3h-52.8l-11.8 24.1z" fill="#fe6552" p-id="4804"></path>
+            </svg>
+          </div>
+
         </div>
 
       </div>
 
       <div id="games-add">
-        <div onclick="console.log(123)" id="games-add-item">&nbsp;&nbsp;&nbsp;＋&nbsp;添加游戏 </div>
+        <div onclick="app.SearchGame('')" id="games-add-item">&nbsp;&nbsp;&nbsp;＋&nbsp;添加游戏 </div>
       </div>
     </div>
 
@@ -62,29 +59,27 @@
         </div>
       </div>
     </div>
-
   </div>
 
   <div id="main-body">
 
     <!-- 搜索游戏并添加 -->
     <div id="search-game">
-      <input id="search-game-input" placeholder="搜索游戏关键字">
+      <input id="search-game-input" oninput="app.SearchGame(this.value)" placeholder="搜索游戏关键字" autocomplete="off">
       <div id="search-game-grid">
 
-        <div class="search-game-grid-item">
+        <div class="search-game-grid-item" id="search-game-grid-item-template" style="display: none;">
           <img class="search-game-grid-item-ad" src="assets/images/images/pubg-ad.png">
           <div class="search-game-grid-item-name">绝地求生</div>
           <div class="search-game-grid-item-focus">
-            <img onclick="" class="search-game-grid-item-focus-icon" src="assets/images/add.png">
+            <img onclick="app.AddGame(Number(this.parentElement.parentElement.dataset.game))" class="search-game-grid-item-focus-icon" src="assets/images/add.png">
           </div>
         </div>
-
       </div>
     </div>
 
     <!-- 游戏详情页 -->
-    <div id="game-detail">
+    <div id="game-detail" data-game="0">
       <img id="game-detail-bg" src="assets/images/images/dnf-bg.jpg"></img>
       <div id="game-detail-body">
 
@@ -96,45 +91,34 @@
               2024年8月26日 15:38:11
             </div>
             &nbsp;&nbsp;&nbsp;&nbsp;累计加速:&nbsp;
-            <div id="game-detail-body-title-info-total">
+            <div id="game-detail-body-title-info-total-hours">
               13
             </div>
             小时
+            &nbsp;&nbsp;&nbsp;&nbsp;加速流量:&nbsp;
+            <div id="game-detail-body-title-info-total-bytes">
+              644.3KB
+            </div>
           </div>
         </div>
 
         <div id="game-detail-body-acc">
           <div id="game-detail-body-acc-setting">
 
-            <select id="game-detail-body-acc-setting-zone">
-              <option value="option3">北美服</option>
-              <option value="option1">亚服</option>
-              <option value="option2">俄服</option>
+            <select id="game-detail-body-acc-setting-zone" onchange="app.SetGameServer(this.value)">
+              <option>俄服</option>
+              <option>欧服</option>
+              <option>北美服</option>
+              <option>亚服</option>
             </select>
 
-
             <ul id="game-detail-body-acc-setting-route">
-              <script type="text/javascript">
-                var routeMode = 'auto';
-                function updateRouteMode(id) {
-                  console.log(id);
-                  if (id == 'route-mode-auto') {
-                    routeMode = 'auto';
-                    document.getElementById('route-mode-auto').style.listStyleType = 'disc';
-                    document.getElementById('route-mode-fix').style.listStyleType = 'circle';
-                  } else {
-                    routeMode = 'fix';
-                    document.getElementById('route-mode-auto').style.listStyleType = 'circle';
-                    document.getElementById('route-mode-fix').style.listStyleType = 'disc';
-                  }
-                }
-              </script>
-              <li onclick="updateRouteMode(this.id)" name="route-mode" id="route-mode-auto" style="list-style-type: disc; cursor: pointer;">智能路由</li>
-              <li onclick="updateRouteMode(this.id)" name="route-mode" id="route-mode-fix" style="list-style-type: circle; cursor: pointer;">固定路由</li>
+              <li onclick="app.SetRouteMode(false)" id="game-detail-body-acc-route-auto" style="list-style-type: disc; cursor: pointer;">智能路由</li>
+              <li onclick="app.SetRouteMode(true)" id="game-detail-body-acc-route-fix" style="list-style-type: circle; cursor: pointer;">固定路由</li>
             </ul>
           </div>
 
-          <div id="game-detail-body-acc-start">
+          <div id="game-detail-body-acc-start" onclick="app.StartAccele(Number(this.parentElement.parentElement.parentElement.dataset.game))">
             <img src="assets/images/accelerate.png" id="game-detail-body-acc-start-icon">
             <div id="game-detail-body-acc-start-text">加速游戏</div>
           </div>
@@ -161,7 +145,7 @@
               </div>
             </div>
 
-            <div id="accelerate-detail-base-info-stop">停止加速</div>
+            <div id="accelerate-detail-base-info-stop" onclick="app.StopAccele(Number(this.parentElement.parentElement.parentElement.parentElement.dataset.game))">停止加速</div>
           </div>
 
           <div id="accelerate-detail-base-route">
@@ -208,235 +192,6 @@
 
 </body>
 
-<footer>
-  <script type="text/javascript">
-
-
-
-    class Stats {
-      constructor() {
-        this.period = 3000 // 数据点间隔 3s
-        this.count = 20
-        this.delay_id = "accelerate-chart-delay"
-        this.loss_id = "accelerate-chart-loss"
-        this.gateway_id = "route-link-gateway"
-        this.forward_id = "route-link-forward"
-        this.server_id = "route-link-server"
-        this.color = ['rgb(5,115,205)', 'rgb(255,137,2)']
-
-        this.delay = (function (ctx) {
-          var chart = echarts.init(document.getElementById(ctx.delay_id))
-
-          var option = {
-            title: {
-              text: '延迟 (ms)',
-              textStyle: { color: "#fafafa", fontSize: '12', fontWeight: 'normal' },
-              bottom: '0px', left: 'center',
-            },
-            color: ctx.color,
-            tooltip: {
-              trigger: 'axis',
-              confine: true,
-              formatter: function (params) {
-                console.log(params)
-                var time = params[0].data[0]
-                var h = time.getHours().toString().padStart(2, '0')
-                var m = time.getMinutes().toString().padStart(2, '0')
-                var s = time.getSeconds().toString().padStart(2, '0')
-
-                var gateway = params[0].data[1] === null ? 'null' : (params[0].data[1]).toString()
-                var forward = params[1].data[1] === null ? 'null' : (params[1].data[1]).toString()
-                var gateway_loc = params[0].data[2]
-                var forward_loc = params[1].data[2]
-
-                return `
-                  <div style="font-size:xx-small;">
-                    <div>${h}:${m}:${s}</div>
-                    <div style="color:${ctx.color[1]}">本机&nbsp;-&nbsp;${forward_loc}: ${forward}&nbsp;ms</div>
-                    <div style="color:${ctx.color[0]}">本机&nbsp;-&nbsp;${gateway_loc}: ${gateway}&nbsp;ms</div>
-                  </div>
-                `
-              },
-            },
-            xAxis: { type: 'time', show: false, },
-            yAxis: {
-              type: 'value',
-              splitLine: { show: true, lineStyle: { color: '#525359' } },
-              axisLabel: { formatter: '{value}ms' }
-            },
-            series: [],
-            grid: { left: '50px', right: '6px', top: '15px', bottom: '30px', }
-          };
-
-
-          var series = ['gateway', 'forward']
-          for (let i = 0; i < series.length; i++) {
-            option.series.push(
-              {
-                name: series[i], type: 'line', animationDuration: 400,
-                smooth: 0.4, data: [],
-                lineStyle: { width: 1 },
-                itemStyle: { opacity: 0.2 },
-              }
-            )
-          }
-          chart.setOption(option)
-          return chart
-        })(this)
-
-        this.loss = (function (ctx) {
-          var chart = echarts.init(document.getElementById(ctx.loss_id));
-          var names = ['上行丢包', '下行丢包']
-
-          var option = {
-            color: ctx.color,
-            tooltip: {
-              trigger: 'axis',
-              confine: true,
-              formatter: function (params) {
-                // console.log(params)
-
-                var time = params[0].data[0]
-                var h = time.getHours().toString().padStart(2, '0')
-                var m = time.getMinutes().toString().padStart(2, '0')
-                var s = time.getSeconds().toString().padStart(2, '0')
-
-                var loss1 = params[0].data[1] === null ? 'null' : (params[0].data[1]).toString()
-                var loss2 = params[1].data[1] === null ? 'null' : (params[1].data[1]).toString()
-                var gateway_loc = params[0].data[2]
-                var forward_loc = params[1].data[2]
-
-                if (params[0].seriesName == names[0]) {
-                  return `
-                    <div style="font-size:xx-small;">
-                      <div>${h}:${m}:${s}</div>
-                      <div style="color:${ctx.color[0]}">本机&nbsp;-&nbsp;${gateway_loc}: ${loss1}%</div>
-                      <div style="color:${ctx.color[1]}">${gateway_loc}&nbsp;-&nbsp;${forward_loc}: ${loss2}%</div>
-                    </div>
-                  `
-                } else {
-                  return `
-                    <div style="font-size:xx-small;">
-                      <div>${h}:${m}:${s}</div>
-                      <div style="color:${ctx.color[1]}">${forward_loc}&nbsp;-&nbsp;${gateway_loc}: ${loss2}&nbsp;%</div>
-                      <div style="color:${ctx.color[0]}">${gateway_loc}&nbsp;-&nbsp;本机: ${loss1}&nbsp;%</div>
-                    </div>
-                  `
-                }
-              },
-            },
-            legend: {
-              type: 'plain', data: names,
-              bottom: '0px', icon: 'none',
-              textStyle: { color: '#fafafa', fontSize: '12' },
-              selected: { "下行丢包": false },
-              selectedMode: 'single',
-            },
-
-            xAxis: { type: 'time', show: false, },
-            yAxis: {
-              type: 'value', min: 0, //max: 100,
-              splitLine: { show: true, lineStyle: { color: '#525359' } },
-              axisLabel: { formatter: '{value}%' }
-            },
-            series: [],
-            grid: { left: '50px', right: '6px', top: '15px', bottom: '30px', }
-          };
-
-          var start = new Date((new Date()).getTime() - (ctx.count - 1) * ctx.period);
-          for (let i = 0; i < names.length; i++) {
-            for (let j = 0; j < 2; j++) {
-              option.series.push(
-                {
-                  name: names[i], type: 'line', animationDuration: 400,
-                  smooth: 0.4, data: [],
-                  lineStyle: { width: 1 },
-                  itemStyle: { opacity: 0.2, color: ctx.color[j] },
-                }
-              )
-            }
-          }
-
-          chart.setOption(option)
-          return chart
-        })(this)
-      }
-
-      // 更新统计数据
-      push(stats) {
-        {
-          var f = function (v) {
-            return v == null ? " ? ? " : v
-          }
-          stats.gateway_loc = f(stats.gateway_loc)
-          stats.forward_loc = f(stats.forward_loc)
-          stats.server_loc = f(stats.server_loc)
-
-          document.getElementById(this.gateway_id).innerText = stats.gateway_loc
-          document.getElementById(this.forward_id).innerText = stats.forward_loc
-          document.getElementById(this.server_id).innerText = stats.server_loc
-        }
-        {
-          var opt = this.delay.getOption()
-          opt.xAxis = {
-            min: new Date(stats.time.getTime() - this.count * this.period),
-          }
-
-          var f = function (v) {
-            return v == null || v < 0.000001 || v > 300 ? null : v.toFixed(1)
-          }
-          opt.series[0].data.push([stats.time, f(stats.rtt_gateway), stats.gateway_loc])
-          opt.series[1].data.push([stats.time, f(stats.rtt_forward), stats.forward_loc])
-          this.delay.setOption(opt)
-        }
-        {
-          var opt = this.loss.getOption()
-          opt.xAxis = {
-            min: new Date(stats.time.getTime() - this.count * this.period),
-          }
-
-          var f = function (v) {
-            return v == null || v < 0.000001 || v > 100 ? null : v.toFixed(1)
-          }
-          opt.series[0].data.push([stats.time, f(stats.loss_client_uplink), stats.gateway_loc])
-          opt.series[1].data.push([stats.time, f(stats.loss_client_downlink), stats.forward_loc])
-          opt.series[2].data.push([stats.time, f(stats.loss_gateway_uplink), stats.gateway_loc])
-          opt.series[3].data.push([stats.time, f(stats.loss_gateway_downlink), stats.forward_loc])
-          this.loss.setOption(opt)
-        }
-      }
-    }
-
-    var stats = new Stats()
-
-    worker = new Worker('worker.js');
-    worker.onmessage = function (e) {
-
-      var rtt_gateay = 400
-      var loss_g_d = 0
-      if ((new Date().getSeconds() % 10 != 9)) {
-        rtt_gateay = Math.random() * 100
-        loss_g_d = Math.random()
-      }
-
-      stats.push({
-        time: new Date(),
-        gateway_loc: '北京',
-        forward_loc: '莫斯科',
-        server_loc: '圣彼得堡',
-
-        rtt_gateway: rtt_gateay,
-        rtt_forward: (100 + Math.random() * 50),
-
-        loss_client_uplink: Math.random() * 3,
-        loss_client_downlink: Math.random() * 1,
-        loss_gateway_uplink: Math.random(),
-        loss_gateway_downlink: loss_g_d,
-      })
-    }
-    worker.postMessage(stats.period) // start
-
-  </script>
-</footer>
+<footer></footer>
 
 </html>

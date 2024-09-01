@@ -17,15 +17,16 @@ func _() {
 	_ = x[Accelerating-6]
 	_ = x[InvalidMonths-7]
 	_ = x[GameExist-8]
-	_ = x[NotAccelerated-9]
-	_ = x[RequireGameId-10]
-	_ = x[Unknown-11]
-	_ = x[_end-12]
+	_ = x[GameNotExist-9]
+	_ = x[NotAccelerated-10]
+	_ = x[RequireGameId-11]
+	_ = x[Unknown-12]
+	_ = x[_end-13]
 }
 
-const _MsgCode_name = "oknot found没有登录已经登录vip 已过期请选择加速的游戏游戏已在加速无效月数游戏已存在没有加速请指定游戏未知_end"
+const _MsgCode_name = "oknot found没有登录已经登录vip 已过期请选择加速的游戏游戏已在加速无效月数游戏已存在游戏不存在没有加速未指定游戏未知_end"
 
-var _MsgCode_index = [...]uint8{0, 2, 11, 23, 35, 48, 72, 90, 102, 117, 129, 144, 150, 154}
+var _MsgCode_index = [...]uint8{0, 2, 11, 23, 35, 48, 72, 90, 102, 117, 132, 144, 159, 165, 169}
 
 func (i MsgCode) String() string {
 	if i < 0 || i >= MsgCode(len(_MsgCode_index)-1) {
